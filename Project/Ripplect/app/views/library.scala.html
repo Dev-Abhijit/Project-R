@@ -1,0 +1,130 @@
+@(recent_threads: List[MyData], userName: String, projects: List[Project], library: List[List[Book]], myLibForm: Form[Library_meta])
+
+@import helper._
+
+
+@main("My Library"){
+<div class="home-link">
+<a href="@routes.Application.home(userName)">My Home</a>
+</div>
+<div class="myread">
+<h3 id="myread-h3">My Recent Reads</h3>
+    <ul class="myread-ul">
+        @for(recent_thread <- recent_threads){
+
+            <li class="read">
+                @recent_thread.thread.header
+            </li>
+        }
+    </ul>
+<h3 id="mycollab-h3">My Collaborations</h3>
+<h3 id="mylib-h3">My Libraries</h3>
+<div class="sidebar-lib-home">
+@for(books <- library){
+<div class="sidebar-library">
+<div class="sidebar-shelf">
+<ul class="mylib-ul">
+@books.zipWithIndex.map{
+ case (book, i) => {
+<li class="book@i">
+<div  class="book">
+@if(book.thread.header.length() > 25){
+
+@book.thread.header.substring(0,25)..
+} else {
+@book.thread.header
+}
+</div>
+</li>
+}
+}
+</ul>
+<div class="shelf-stand">&nbsp;</div>
+
+
+
+</div>
+</div>
+
+}
+<div class="lib-home-link"><a href=@routes.Application.libHome(userName)>Library Home >></a></div>
+</div>
+</div>
+}{
+	<div class="content-home">
+	<h3>My Library</h3>
+	@for(books <- library){
+	<div class="lib-home">
+
+	<ul class="lib-home-content-ul">
+
+	@books.zipWithIndex.map{
+	 case (book, i) => {
+	 @if(i < 1){
+	 <h4>@book.shelf_Id.name</h4>
+	 }
+	 @if(i < 2){
+
+	<li>
+	<div  class="book">
+
+	@if(book.thread.header.length() > 30){
+
+	@book.thread.header.substring(0,30)..
+	} else {
+	@book.thread.header
+	}
+	</div>
+	 <div class="drop-shadow">
+	 	@book.thread.excerpt
+		@if(book.thread.image_loc != null){
+		<img src=@routes.Assets.at(book.thread.image_loc) width="100%">
+		}
+	 </div>
+	 </li>
+	 } else {
+	 <li class="mylib-header-li">
+	 <div class="mylib-book@i">
+	@if(book.thread.header.length() > 45){
+
+	@book.thread.header.substring(0,45)..
+	} else {
+	@book.thread.header
+	}
+	<br/>
+	<span class="mylib-author">
+	@book.thread.user.getName()
+	</span>
+	 </li>
+	 }
+	}
+	}
+	</ul>
+<div class="mylib-stand">&nbsp;</div>
+<div style="clear:both;width:10px;">&nbsp;</div>
+}
+
+		<div class="start-text-form">
+    	@helper.form(action = routes.Application.createShelf(userName)) {
+
+        <fieldset>
+            <legend>Librarian's Desk</legend>
+
+		<input type="text" name="name" size="40">
+        <input type="submit" class="" value="Create a New Shelf">
+
+        </fieldset>
+        <br/><br/>
+        }
+		</div>
+	</div>
+
+
+
+}{
+	<div class="right-content">
+	<a href="@routes.Start.index(userName)" class="button-side">Start Thread</a>
+	<a href="@routes.Start.startNewProject(userName)" class="button-side">Start Collaboration</a>
+	<a href="" class="button-y">Yelp!</a>
+	</div>
+}

@@ -1,0 +1,81 @@
+@(recent_threads: List[MyData], userName: String, books: List[Book], myProjectForm: Form[Project])
+
+@import helper._
+
+
+@main("Home Page"){
+<div class="home-link">
+<a href="@routes.Application.home(userName)">My Home</a>
+</div>
+<div class="myread">
+<h3 id="myread-h3">My Recent Reads</h3>
+    <ul class="myread-ul">
+        @for(recent_thread <- recent_threads){
+
+            <li class="read">
+                @recent_thread.thread.header
+            </li>
+        }
+    </ul>
+<h3>My Collaborations</h3>
+<h3>My Libraries</h3>
+<div class="sidebar-library">
+<div class="sidebar-shelf">
+<ul>
+@books.zipWithIndex.map{
+ case (book, i) => {
+<li class="book@i">
+<div  class="book">
+@if(book.thread.header.length() > 25){
+
+@book.thread.header.substring(0,25)..
+} else {
+@book.thread.header
+}
+</div>
+</li>
+}
+}
+</ul>
+<div class="shelf-stand">&nbsp;</div>
+</div>
+</div>
+</div>
+}{
+	<div class="start-home">
+
+		<div class="drop-shadow lifted">
+		<div class="start-text-form">
+    	@helper.form(action = routes.Start.submitProject(userName)) {
+
+        <fieldset>
+            <legend>Start A Collaborative Project</legend>
+
+            @inputText(
+                myProjectForm("title"),
+                '_label -> "Title",
+                '_help -> "Please choose a title for your project.",
+                '_error -> myProjectForm.globalError,
+                'size -> 80
+            )
+
+            @inputText(
+                myProjectForm("tagline"), '_label -> "Tagline",
+                '_help -> "Write a catchy tagline to describe the project", 'size -> 110
+
+            )
+
+        </fieldset>
+
+        <input type="submit" class="" value="Submit">
+        }
+		</div>
+		</div>
+    </div>
+}{
+	<div class="right-content">
+	<a href="@routes.Start.index(userName)" class="button-side">Start Thread</a>
+	<a href="@routes.Start.startNewProject(userName)" class="button-side">Start Collaboration</a>
+	<a href="" class="button-y">Yelp!</a>
+	</div>
+}

@@ -1,0 +1,280 @@
+Spring Social 1.1.0 Milestone 2 (February 12, 2012)
+===================================================
+ Bug Fixes
+  * Set character set to UTF-8 for string parts of multipart messages to allow for
+    Korean and other characters to be posted in status updates. (SOCIALTW-37)
+
+ Improvements
+  * Tighter integration with Spring Security with SocialAuthenticationFilter.
+    (SOCIAL-232)
+  * Support for non-standard parameters in request token and authorization URLs.
+    (SOCIAL-349)
+  * Interceptors in ProviderSignInController to allow for custom behavior in
+    authorization flow. (SOCIAL-255)
+  * Allow for more control in specifying a callback URL, both with an injectable
+    property and an overridable method. (SOCIAL-259)
+
+Spring Social 1.1.0 Milestone 1 (November 26, 2012)
+===================================================
+Compatibility Notes
+  * Spring 3.0.x compatibility removed in this release. Spring Social depends on Spring 3.1.x
+    or higher.
+
+Bug Fixes
+  * Properly calculate expiry time to fix integer overflow when the expiry value is large.
+    (SOCIAL-303)
+  * Corrected package name for ProviderSignInController in reference documentation. (SOCIAL-304)
+  * Corrected name of schema file in reference documentation. (SOCIAL-318)
+
+Improvements
+  * Added an XML configuration namespace to simplify configuring Spring Social connection
+    repositories. Also established base bean definition parser and namespace handler classes
+    for provider modules to build on configuration support for connection factory and API
+    binding. (SOCIAL-292)
+  * Simplified Spring Social configuration for Java-based configuration. (SOCIAL-293)
+  * HTTP Basic client authentication for OAuth 2 clients to adhere to the latest OAuth 2 spec
+    drafts. (SOCIAL-320)
+  * Added postDelete() to ConnectionInterceptor to offer a connection lifecycle hook for
+    disconnect. (SOCIAL-239)
+  * Support for Resource Owner Credentials Grant to OAuth2Operations/OAuth2Template.
+    (SOCIAL-305)
+  * Support for Client Credentials Grant to OAuth2Operations/OAuth2Template.
+    (SOCIAL-324)
+
+Spring Social 1.0.2 Release (January 23, 2012)
+==============================================
+Bug Fixes
+  * Handle errors from provider during connection/sign-in process more gracefully. (SOCIAL-280)
+  * Properly set valuesInitialized flag in AbstractConnection after a profile has been set the first
+    time to avoid unnecessary fetches from the provider. (SOCIAL-282)
+  * Guard against potential NullPointerException in JdbcConnectionRepository.findConnectionToUsers().
+    (SOCIAL-283)
+  * Allow for null returned from ConnectionSignUp.execute() to indicate a problem with implicitly
+    creating a user. (SOCIAL-254)
+
+Spring Social 1.0.1 Release (December 15, 2011)
+===============================================
+Compatibility Notes
+  * Changed signature of ConnectController.connectionStatusRedirect() to take a NativeWebRequest in
+    addition to the provider ID (SOCIAL-258).
+
+Bug Fixes
+  * Fixed ConnectController to use the servlet path when doing connection status redirects so that
+    the application's DispatcherServlet does not have to be mapped to "/" (SOCIAL-258).
+  * A handful of documentation fixes (SOCIAL-249 and SOCIAL-273)
+
+Improvements
+  * OAuth2Version.BEARER's value is now "Bearer" to be consistent with the latest drafts of the
+    specification (SOCIAL-272)
+  * Now built against Spring Framework 3.1.0.RELEASE (still compatible with Spring Framework 3.0.6)
+  * Now built against Spring Security 3.1.0.RELEASE
+
+Spring Social 1.0.0 Release (September 8, 2011)
+===============================================
+Bug Fixes
+  * OAuth1Parameters.NONE was accidentally made mutable; it is now back to being immutable as it should be.
+  * Updated reference documentation to reflect the minor API changes introduced in RC3.
+  * OAuth-encode consumer/token secrets when creating an OAuth 1 signature key (SOCIAL-248).
+  * Handle signature differences between Spring 3.1M2 and Spring 3.1RC1 RestTemplate.setInterceptors() 
+    (SOCIAL-247).
+
+Improvements
+  * Added new configureRestTemplate() subclassing hook to AbstractOAuth1ApiBinding and AbstractOAuth2ApiBinding
+    so that subclasses can configure the RestTemplate without writing that configuration code in the constructor.
+  * Added getFormMessageConverter(), getJsonMessageConverter(), and getByteArrayMessageConverter() hooks to 
+    AbstractOAuth1ApiBinding and AbstractOAuth2ApiBinding for convenient per-converter customization.
+  * Added default constructor to OAuth1Parameters and OAuth2Parameters for more convenient standalone usage.  
+  * Changed applicationUrl property on ConnectController and ProviderSignInController to be a String instead of URL.
+
+Spring Social 1.0.0 Release Candidate 3 (August 25, 2011)
+=========================================================
+Bug Fixes
+   * Discontinued use of "../"-based relative URLs when redirecting
+     after deleting a connection to fix redirection when the disconnect
+     form's action URL has a trailing slash. (SOCIAL-238)
+
+Improvements
+   * Added schema for JdbcUsersConnectionRepository to reference documentation
+     and briefly described its purpose and location within the core module.
+     (SOCIAL-241)
+   * ConnectInterceptor.preConnect() now accepts a MultiValueMap<String, String>
+     to be able to add parameters to the authorization URL. (SOCIAL-243)
+   * New samples illustrating a popup-based connection flow and Spring Social
+     in a Facebook Canvas application.
+
+Spring Social 1.0.0 Release Candidate 2 (July 26, 2011)
+=======================================================
+Bug Fixes
+   * Display a message indicating a user should sign-up after a provider
+     sign-in is unable to find a matching local user. (SOCIAL-207)
+   * When ConnectController is given an application URL, it now uses the
+     entire URL to construct the callback URL instead of piecing together
+     the callback URL from specific parts of it. (SOCIAL-200)
+   * Use coalesce function in SQL rather than ifnull for greater DB
+     compatibility. (SOCIAL-226)
+   * Added cache-control headers in response for ConnectController status
+     pages to prevent caching. (SOCIAL-224)
+   * Made ConnectionKey to implement Serializable, so that DuplicateConnectionException
+     can be serialized in the session. (SOCIAL-225)
+
+Improvements
+   * ProviderSignInController now handles callbacks from the provider when the
+     user denies authorization by redirecting to the application's sign in page.
+     (SOCIAL-236)
+   * If multiple matching connections are found during provider sign in, redirect
+     to the sign in page to offer the user a chance to sign in through some other
+     means (username/password, via a different provider, etc). (SOCIAL-237)
+
+Spring Social 1.0.0 Release Candidate 1 (June 22, 2011)
+=======================================================
+Compatibility Notes
+   * Extracted provider-specific modules to separate projects.
+   * Renamed {Provider}Api.java interfaces to {Provider}.java.
+     (e.g. TwitterApi is now Twitter, FacebookApi is now Facebook, etc)
+   * Renamed several operations in ConnectionRepository (see JavaDocs/source for details).
+   * Renamed AbstractOAuth1ApiTemplate and AbstractOAuth2ApiTemplate to AbstractOAuth1ApiBinding and AbstractOAuth2ApiBinding, respectively.
+   * Simplified ConnectController and ProviderSignInController constructors (see JavaDocs/source for details).
+   * Moved ConnectController & ProviderSignInController's applicationUrl property from constructor to setter and made optional.
+   * Renamed ConnectController#postLoginUrl property to postSignInUrl for consistency.
+   * Renamed SignInService to SignInAdapter for clarity & added Connection, HttpServletRequest, and HttpServletResponse parameters to signIn method signature.
+   * Factored out web.ConnectSupport from ConnectController and ProviderSignInController for reusability.
+   * Removed commons-codec dependency; spring-security-crypto is now used for Base64 encoding as well as encryption.
+  
+New Features
+   * Enabled use of Spring Social behind a proxy
+   * Facebook API binding:
+     * Photo and video upload
+     * Facebook search
+     * Facebook pages
+   * Twitter API binding:
+     * Block API
+     * Notifications API
+     * Geo API
+   * Added ConnectionSignUp command to sign-in up a new user from a Connection automatically
+   * Introduced super ApiBinding interface with isAuthorized() tester that can be used to determine if the application has been authorized to invoke the API on behalf of a user.
+
+Bug Fixes
+   * Fixed Spring 3.0 compatibility issues (SOCIAL-152)
+   * Converted LinkedInTemplate response binding to be JSON-based, fixing a
+     problem with Android compatibility (SOCIAL-148)
+   * Fixed several JSON deserialization issues by either adding new fields to
+     the model classes or by setting Jackson to ignore unknown properties.
+   * Made javax.Inject dependency a required dependency of spring-social-web (SOCIAL-158)
+   * Added setRequestFactory() methods to OAuth1Template and OAuth2Template to
+     allow for customization of the request factory (SOCIAL-133)
+   * AbstractOAuth1ApiBinding and AbstractOAuth2ApiBinding now create a RestTemplate
+     with a minimal set of message converters. In doing so, they set "UTF-8" character
+     set on FormHttpMessageConverter. (SOCIAL-170)
+   * Handle DuplicateKeyException, putting "social.addConnection.duplicate" in request
+     as flash variable and then into model so that view can inform user of the problem.
+   * Fixed Android 8 (and lower) compatibility issue by creating a HttpComponents
+     request factory that does not put an "Expect: 100-continue" header in the
+     request (SOCIAL-144)
+   * Added setSignUpUrl() to ProviderSignInController to enable configuration of
+     the sign up page location (SOCIAL-183)
+   * Changed TwitterErrorHandler and FacebookErrorHandler to those an
+     UncategorizedApiException if an error response body is non-JSON (and thus does
+     not match the expected error message response). (SOCIAL-173)
+   * Made the applicationUrl property of ConnectController and ProviderSignInController
+     optional, constructing the callback URL from information in the request (SOCIAL-187)
+   * Create new SimpleDateFormat as-needed to fix thread safety problem (SOCIAL-198)
+     
+Spring Social 1.0.0 Milestone 3 (Apr 27, 2011)
+==============================================
+New Features
+   * A more complete Twitter API binding, including...
+     * Reading, sending, and deleting direct messages
+     * Retrieving a user's friends and followers and (un)following other users
+     * Maintaining and subscribing to lists
+     * Reading daily/weekly/local/current trends
+     * Maintaining saved searches
+     * Search for users
+     * Getting suggestions on who to follow
+   * A more complete Facebook API binding, including...
+     * Reading, posting, and deleting comments
+     * Maintaining events
+     * Retrieving and RSVP'ing to a user's invitations
+     * Reading and posting to feeds
+     * Maintaining friend lists
+     * Retrieving a user's friends
+     * Reading group information and members
+     * Reading a user's interests and likes (e.g. movies, books, music, etc)
+     * Liking and unliking
+     * Retrieving photo albums, photos, and video data
+     * Facebook Places checkins
+   * New ProviderSignInController for signing into an application by first
+     signing into a provider such as Twitter or Facebook
+   * Now supports use in an Android environment and integrated with Spring 
+     Android project as of its 1.0.0.M3 release.
+   * The ability to test a connection and refresh an expired connection
+   * The ability to update status across connections in a uniform way
+   * The ability to access user profile data on a connection in a uniform way
+     and use it to pre-populate application registration forms
+   * New query operations for finding connections in different ways
+   * Enhanced support for extending the framework, including documentation that walks
+     you through the process of adding support for a new service provider
+   * Many design and architectural improvements driven by community feedback
+   * Updated Spring Social showcase sample
+   * Updated documentation
+
+Bug fixes:
+   * SOCIAL-76: TwitterTemplate converts Cyrillic letters to ?
+   * SOCIAL-118: ServiceProviderConnections API assumes stored connection/key validity
+
+
+
+Spring Social 1.0.0 Milestone 2 (Feb 25, 2011)
+==============================================
+For release notes see:
+ https://jira.springframework.org/secure/ReleaseNote.jspa?projectId=10481&version=11738
+
+New Features
+   * New service provider framework to model interaction with service providers.
+   * New connect controller to handle the application's role in the "OAuth Dance"
+     for both OAuth 1 and OAuth 2 service providers.
+   * New TwitterSigninController that enables a user to sign into an application by
+     signing into Twitter.
+   * New FacebookSigninController   that enables a user to sign into an application by
+     signing into Facebook.
+   * Expanded TwitterOperations interface:
+     * Posting location metadata along with Tweet
+     * Retrieving user, friends, public, and home timelines
+     * Send and receive direct messages
+     * Retrieving a user's full Twitter profile
+   * New social templates (minimal functionality in this release):
+     * Gowalla - Retrieve user's top checkins
+     * GitHub - Retrieve a user's profile data
+   * More documentation!
+
+Bug fixes:
+   * SOCIAL-52: TwitterTemplate doesn't work with other Locale than Locale.ENGLISH
+   * SOCIAL-53: Cannot run app based on spring-social under Jetty 7.2.1
+   * SOCIAL-59: Can't send asterisks in tweets
+   * SOCIAL-86: IllegalArgumentException: Non-serializable attribute oauthToken
+   * SOCIAL-92: getCreatedAt return null due to Unparseable date in TwitterTemplate
+
+Known Issues:
+    * SPR-8002: ProviderSignAttempt session-scoped objects not serializable due to javax.inject.Provider serialization issue.
+
+
+Spring Social 1.0.0 Milestone 1 (Oct 29, 2010)
+==============================================
+
+New Features
+   * OAuthSigningClientHttpRequest and OAuthSigningClientHttpRequestFactory for signing
+     requests sent through RestTemplate
+   * TwitterOperations/TwitterTemplate for interaction with Twitter's REST API
+      * Supports tweeting, retweeting, retrieval of friends, retrieval of screen name,
+        and searching
+   * FacebookOperations/FacebookTemplate for interaction with Facebook's Graph API
+      * Supports posting messages (and links) to a user's wall, retrieval of friends,
+        retrieval of profile ID, profile picture, profile URL.
+   * LinkedInOperations/LinkedInTemplate for interaction with LinkedIn's REST API
+      * Supports retrieval of a user's connections and profile details
+   * TripItOperations/TripItTemplate for interaction with TripItTemplate
+      * Supports retrieval of a user's profile details, and upcoming trips
+   * GreenhouseOperations/GreenhouseTemplate for interaction with Greenhouse's REST API
+      * Supports retrieval of a user's profile details, upcoming events, events after a
+        given day, and sessions taking place on a given day
+   * FacebookWebArgumentResolver to extract a Facebook user's user ID and access token out
+     of the cookie written at authentication

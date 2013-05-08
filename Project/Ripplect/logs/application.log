@@ -1,0 +1,15 @@
+2013-05-03 17:34:40,750 - [INFO] - from play in main 
+Listening for HTTP on port 9000...
+
+2013-05-03 17:34:53,785 - [INFO] - from play in play-akka.actor.default-dispatcher-3 
+database [default] connected at jdbc:mysql://localhost/ripplect
+
+2013-05-03 17:35:03,488 - [INFO] - from play in play-akka.actor.default-dispatcher-3 
+Application started (Dev)
+
+2013-05-03 18:47:31,879 - [INFO] - from play in play-akka.actor.default-dispatcher-18 
+database [default] connected at jdbc:mysql://localhost/ripplect
+
+2013-05-03 18:47:34,645 - [INFO] - from play in play-akka.actor.default-dispatcher-18 
+Application started (Dev)
+

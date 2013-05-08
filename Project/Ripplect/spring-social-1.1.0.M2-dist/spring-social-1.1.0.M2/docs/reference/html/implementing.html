@@ -1,0 +1,518 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>3.&nbsp;Adding Support for a New Service Provider</title><link rel="stylesheet" href="css/manual-multipage.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"><link rel="home" href="index.html" title="Spring Social Reference Documentation"><link rel="up" href="index.html" title="Spring Social Reference Documentation"><link rel="prev" href="serviceprovider.html" title="2.&nbsp;Service Provider 'Connect' Framework"><link rel="next" href="connecting.html" title="4.&nbsp;Connecting to Service Providers"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">3.&nbsp;Adding Support for a New Service Provider</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="serviceprovider.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="connecting.html">Next</a></td></tr></table><hr></div><div class="chapter" title="3.&nbsp;Adding Support for a New Service Provider"><div class="titlepage"><div><div><h2 class="title"><a name="implementing"></a>3.&nbsp;Adding Support for a New Service Provider</h2></div></div></div>
+	
+	<p>
+		Spring Social makes it easy to add support for service providers that are not already supported by the framework.
+		If you review the existing client modules, such as spring-social-twitter and spring-social-facebook, you will discover they are implemented in a consistent manner and they apply a set of well-defined extension points.
+		In this chapter, you will learn how to add support for new service providers you wish to integrate into your applications.
+	</p>
+	<div class="section" title="3.1&nbsp;Process overview"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing"></a>3.1&nbsp;Process overview</h2></div></div></div>
+		
+		<p>
+			The process of adding support for a new service provider consists of several steps:
+			</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+					<p>Create a source project for the client code e.g. <code class="code">spring-social-twitter</code>.</p>
+				</li><li class="listitem">
+					<p>Develop or integrate a Java binding to the provider's API e.g. <code class="code">Twitter</code>.</p>
+				</li><li class="listitem">
+					<p>Create a ServiceProvider model that allows users to authorize with the remote provider and obtain authorized  API instances e.g. <code class="code">TwitterServiceProvider</code>.</p>
+				</li><li class="listitem">
+					<p>Create an ApiAdapter that maps the provider's native API onto the uniform Connection model e.g. <code class="code">TwitterAdapter</code>.</p>
+				</li><li class="listitem">
+					<p>Finally, create a ConnectionFactory that wraps the other artifacts up and provides a simple interface for establishing connections e.g. <code class="code">TwitterConnectionFactory</code>.</p>
+				</li></ol></div><p>
+		</p>
+		<p>
+			The following sections of this chapter walk you through each of the steps with examples.
+		</p>
+	</div>
+	<div class="section" title="3.2&nbsp;Creating a source project for the provider client code"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-project"></a>3.2&nbsp;Creating a source project for the provider client code</h2></div></div></div>
+		
+		<p>
+			A Spring Social client module is a standard Java project that builds a single jar artifact e.g. spring-social-twitter.jar.
+			We recommend the code structure of a client module follow the guidelines described below.
+		</p>
+		<div class="section" title="3.2.1&nbsp;Code structure guidelines"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-project-structure"></a>3.2.1&nbsp;Code structure guidelines</h3></div></div></div>
+			
+			<p>
+				We recommend the code for a new Spring Social client module reside within the <code class="code">org.springframework.social.{providerId}</code> base package,
+				where {providerId} is a unique identifier you assign to the service provider you are adding support for.
+				Consider some of the providers already supported by the framework as examples:
+				</p><div class="table"><a name="service-providers-implementing-project-structure-examples"></a><p class="title"><b>Table&nbsp;3.1.&nbsp;Spring Social Client Modules</b></p><div class="table-contents">
+					
+					<table summary="Spring Social Client Modules" style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; "><colgroup><col align="left"><col><col></colgroup><thead><tr><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Provider ID</th><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Artifact Name</th><th style="border-bottom: 0.5pt solid ; " align="center">Base Package</th></tr></thead><tbody><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">facebook</td><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; ">spring-social-facebook</td><td style="border-bottom: 0.5pt solid ; ">org.springframework.social.facebook</td></tr><tr><td style="border-right: 0.5pt solid ; " align="left">twitter</td><td style="border-right: 0.5pt solid ; ">spring-social-twitter</td><td style="">org.springframework.social.twitter</td></tr></tbody></table>
+				</div></div><p><br class="table-break">
+			</p>
+			<p>
+				Within the base package, we recommend the following subpackage structure:
+				</p><div class="table"><a name="d4e372"></a><p class="title"><b>Table&nbsp;3.2.&nbsp;Module Structure</b></p><div class="table-contents">
+					
+					<table summary="Module Structure" style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; "><colgroup><col align="left"><col></colgroup><thead><tr><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Subpackage</th><th style="border-bottom: 0.5pt solid ; " align="center">Description</th></tr></thead><tbody><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">api</td><td style="border-bottom: 0.5pt solid ; ">The public interface that defines the API binding.</td></tr><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">api.impl</td><td style="border-bottom: 0.5pt solid ; ">The implementation of the API binding.</td></tr><tr><td style="border-right: 0.5pt solid ; " align="left">connect</td><td style="">The types necessary to establish connections to the service provider.</td></tr></tbody></table>
+				</div></div><p><br class="table-break">
+			</p>
+			<p>
+				You can see this recommended structure in action by reviewing one of the other client modules such as spring-social-twitter:
+				</p><div class="mediaobject" align="center"><img src="images/spring-social-twitter-example.png" align="middle"></div><p>
+			</p>
+			<p>
+				Here, the central service API type, Twitter, is located in the api package along with its supporting operations types and data transfer object types.
+				The primary implementation of that interface, TwitterTemplate, is located in the api.impl package (along with other package-private impl types have that been excluded from this view).
+				Finally, the connect package contains the implementations of various connect SPIs that enable connections to Twitter to be established and persisted.
+			</p>
+		</div>
+	</div>
+	<div class="section" title="3.3&nbsp;Developing a Java binding to the provider's API"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-api"></a>3.3&nbsp;Developing a Java binding to the provider's API</h2></div></div></div>
+		
+		<p>
+			Spring Social favors the development of strongly-typed Java bindings to external service provider APIs.
+			This provides a simple, domain-oriented interface for Java applications to use to consume the API.
+			When adding support for a new service provider, if no suitable Java binding already exists you'll need to develop one.
+			If one already exists, such as Twitter4j for example, it is possible to integrate it into the framework. 
+		</p>
+		<div class="section" title="3.3.1&nbsp;Designing a new Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-new-designing"></a>3.3.1&nbsp;Designing a new Java API binding</h3></div></div></div>
+			
+			<p>
+				API developers retain full control over the design and implementation of their Java bindings.
+				That said, we offer several design guidelines in an effort to improve overall consistency and quality:
+				</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+						<p>
+							<span class="emphasis"><em>Favor separating the API binding interface from the implementation.</em></span>
+							This is illustrated in the spring-social-twitter example in the previous section.
+							There, "Twitter" is the central API binding type and it is declared in the org.springframework.social.twitter.api package with other public types.
+							"TwitterTemplate" is the primary implementation of this interface and is located in the org.springframework.social.twitter.api.impl subpackage along with other package-private implementation types.
+						</p>
+					</li><li class="listitem">
+						<p>
+							<span class="emphasis"><em>Favor organizing the API binding hierarchically by RESTful resource.</em></span>
+							REST-based APIs typically expose access to a number of resources in an hierarchical manner.
+							For example, Twitter's API provides access to "status timelines", "searches", "lists", "direct messages", "friends", "geo location", and "users".
+							Rather than add all operations across these resources to a single flat "Twitter" interface, the Twitter interface is organized hierarchically:
+							</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> Twitter <span class="hl-keyword">extends</span> ApiBinding {
+	
+    DirectMessageOperations directMessageOperations();
+
+    FriendOperations friendOperations();
+
+    GeoOperations geoOperations();
+
+    ListOperations listOperations();
+
+    SearchOperations searchOperations();
+	
+    TimelineOperations timelineOperations();
+
+    UserOperations userOperations();
+
+}</pre><p>
+						</p>
+						<p>
+							DirectMessageOperations, for example, contains API bindings to Twitter's "direct_messages" resource:
+							</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> DirectMessageOperations {
+
+    List&lt;DirectMessage&gt; getDirectMessagesReceived();
+
+    List&lt;DirectMessage&gt; getDirectMessagesSent();
+
+    <span class="hl-keyword">void</span> sendDirectMessage(String toScreenName, String text);
+
+    <span class="hl-keyword">void</span> sendDirectMessage(<span class="hl-keyword">long</span> toUserId, String text);
+	
+    <span class="hl-keyword">void</span> deleteDirectMessage(<span class="hl-keyword">long</span> messageId);
+}
+							</pre><p>
+						</p>
+					</li></ul></div><p>
+			</p>
+		</div>
+		<div class="section" title="3.3.2&nbsp;Implementing a new Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-new-implementing"></a>3.3.2&nbsp;Implementing a new Java API binding</h3></div></div></div>
+			
+			<p>
+				API developers are free to implement their Java API binding with whatever REST/HTTP client they see fit.
+				That said, Spring Social's existing API bindings such as spring-social-twitter all use Spring Framework's RestTemplate in conjunction with the Jackson JSON ObjectMapper and Apache HttpComponents HTTP client.
+				RestTemplate is a popular REST client that provides a uniform object mapping interface across a variety of data exchange formats (JSON, XML, etc).
+				Jackson is the leading Java-based JSON marshalling technology.
+				Apache HttpComponents has proven to be the most robust HTTP client (if it is not available on the classpath Spring Social will fallback to standard J2SE facilities, however).
+				To help promote consistency across Spring Social's supported bindings, we do recommend you consider these implementation technologies (and please let us know if they do not meet your needs).
+			</p>
+			<p>
+				Spring Social has adopted a convention where each API implementation class is named "{ProviderId}Template" e.g. TwitterTemplate.
+				We favor this convention unless there is a good reason to deviate from it.
+				As discussed in the previous section, we recommend keeping implementation types separate from the public API types.
+				We also recommend keeping internal implementation details package-private.
+			</p>
+			<p>
+				The way in which an API binding implementation is constructed will vary based on the API's authorization protocol.
+				For APIs secured with OAuth1, the consumerKey, consumerSecret, accessToken, and accessTokenSecret will be required for construction:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterTemplate(String consumerKey, String consumerSecret, String accessToken, 
+    String accessTokenSecret) { ... }
+				</pre><p>				
+			</p>
+			<p>
+				For OAuth2, only the access token should be required:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> FacebookTemplate(String accessToken) { ... }
+				</pre><p>
+			</p>
+			<p>
+				Each request made to the API server needs to be signed with the authorization credentials provided during construction of the binding.
+				This signing process consists of adding an "Authorization" header to each client request before it is executed.
+				For OAuth1, the process is quite complicated, and is used to support an elaborate request signature verification algorithm between the client and server.
+				For OAuth2, it is a lot simpler, but does still vary across the various drafts of the OAuth2 specification.
+			</p>
+			<p>
+				To encapsulate this complexity, for each authorization protocol Spring Social provides a ApiTemplate base class you may extend from to
+				construct a pre-configured RestTemplate instance that performs the request signing for you. For OAuth1:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TwitterTemplate <span class="hl-keyword">extends</span> AbstractOAuth1ApiBinding {
+    <span class="hl-keyword">public</span> TwitterTemplate(String consumerKey, String consumerSecret, String accessToken, 
+            String accessTokenSecret) {
+        <span class="hl-keyword">super</span>(consumerKey, consumerSecret, accessToken, accessTokenSecret);
+    }
+}			</pre><p>
+			</p>
+			<p>
+				An OAuth2 example:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> FacebookTemplate <span class="hl-keyword">extends</span> AbstractOAuth2ApiBinding {
+    <span class="hl-keyword">public</span> FacebookTemplate(String accessToken) {
+        <span class="hl-keyword">super</span>(accessToken);
+    }
+}
+				</pre><p>
+			</p>
+			<p>
+				Once configured as shown above, you simply implement call getRestTemplate() and implement the various API operations.
+				The existing Spring Social client modules all invoke their RestTemplate instances in a standard manner:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterProfile getUserProfile() {
+    <span class="hl-keyword">return</span> getRestTemplate().getForObject(buildUri(<span class="hl-string">"account/verify_credentials.json"</span>),
+        TwitterProfile.<span class="hl-keyword">class</span>);
+}
+				</pre><p>
+			</p>
+			<p>
+				A note on RestTemplate usage: we do favor the RestTemplate methods that accept a URI object instead of a uri String.
+				This ensures we always properly encode client data submitted in URI query parameters, such as screen_name below:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterProfile getUserProfile(String screenName) {
+    <span class="hl-keyword">return</span> getRestTemplate().getForObject(buildUri(<span class="hl-string">"users/show.json"</span>, 
+        Collections.singletonMap(<span class="hl-string">"screen_name"</span>, screenName)), TwitterProfile.<span class="hl-keyword">class</span>);
+}
+				</pre><p>
+			</p>
+			<p>
+				For complete implementation examples, consult the source of the existing API bindings included in Spring Social.
+				The <code class="code">spring-social-twitter</code> and <code class="code">spring-social-facebook</code> modules provide particularly good references.
+			</p>
+		</div>
+		<div class="section" title="3.3.3&nbsp;Testing a new Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-new-testing"></a>3.3.3&nbsp;Testing a new Java API binding</h3></div></div></div>
+			
+			<p>
+				As part of the spring-social-test module, Spring Social includes a framework for unit testing API bindings.
+				This framework consists of a "MockRestServiceServer" that can be used to mock out API calls to the remote service provider.
+				This allows for the development of independent, performant, automated unit tests that verify client API binding and object mapping behavior.
+			</p>
+			<p>
+				To use, first create a MockRestServiceServer against the RestTemplate instance used by your API implementation:
+			</p>
+			<pre class="programlisting">
+TwitterTemplate twitter = <span class="hl-keyword">new</span> TwitterTemplate(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>, <span class="hl-string">"accessToken"</span>,
+    <span class="hl-string">"accessTokenSecret"</span>);
+MockRestServer mockServer = MockRestServiceServer.createServer(twitter.getRestTemplate());
+			</pre>
+			<p>
+				Then, for each test case, record expectations about how the server should be invoked and answer what it should respond with:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Test</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">void</span> getUserProfile() {
+    HttpHeaders responseHeaders = <span class="hl-keyword">new</span> HttpHeaders();
+    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+    
+    mockServer.expect(requestTo(<span class="hl-string">"https://api.twitter.com/1/account/verify_credentials.json"</span>))
+        .andExpect(method(GET))
+        .andRespond(withResponse(jsonResource(<span class="hl-string">"verify-credentials"</span>), responseHeaders));
+
+    TwitterProfile profile = twitter.userOperations().getUserProfile();
+    assertEquals(<span class="hl-number">161064614</span>, profile.getId());
+    assertEquals(<span class="hl-string">"kdonald"</span>, profile.getScreenName());
+}
+			</pre>
+			<p>
+				In the example above the response body is written from a verify-credentials.json file located in the same package as the test class:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">private</span> Resource jsonResource(String filename) {
+    <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> ClassPathResource(filename + <span class="hl-string">".json"</span>, getClass());
+}
+			</pre>
+			<p>
+				The content of the file should mirror the content the remote service provider would return, allowing the client JSON deserialization behavior to be fully tested:
+			</p>
+			<pre class="programlisting">
+{
+    <span class="hl-string">"id"</span>:<span class="hl-number">161064614</span>,
+    <span class="hl-string">"screen_name"</span>:<span class="hl-string">"kdonald"</span>
+}
+			</pre>
+			<p>
+				For complete test examples, consult the source of the existing API bindings included in Spring Social.
+				The <code class="code">spring-social-twitter</code> and <code class="code">spring-social-facebook</code> modules provide particularly good references.
+			</p>
+		</div>				
+		<div class="section" title="3.3.4&nbsp;Integrating an existing Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-existing-integrating"></a>3.3.4&nbsp;Integrating an existing Java API binding</h3></div></div></div>
+			
+			<p>
+				If you are adding support for a popular service provider, chances are a Java binding to the provider's API may already exist.
+				For example, the Twitter4j library has been around for awhile and provides a complete binding to Twitter's API.
+				Instead of developing your own binding, you may simply wish to integrate what already exists.
+				Spring Social's connect framework has been carefully designed to support this scenario.
+			</p>
+			<p>
+				To integrate an existing API binding, simply note the binding's primary API interface and implementation.
+				For example, in Twitter4j the main API interface is named "Twitter" and instances are constructed by a TwitterFactory.
+				You can always construct such an API instance directly, and you'll see in the following sections how to expose an instance as part of a Connection.
+			</p>
+		</div>
+	</div>
+	<div class="section" title="3.4&nbsp;Creating a ServiceProvider model"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-serviceprovider"></a>3.4&nbsp;Creating a ServiceProvider model</h2></div></div></div>
+		
+		<p>
+			As described in the previous section, a client binding to a secure API such as Facebook or Twitter requires valid user authorization credentials to work.
+			Such credentials are generally obtained by having your application conduct an authorization "dance" or handshake with the service provider.
+			Spring Social provides the ServiceProvider&lt;A&gt; abstraction to handle this "authorization dance".
+			The abstraction also acts as a factory for native API (A) instances.
+		</p>
+		<p>
+			Since the authorization dance is protocol-specific, a ServiceProvider specialization exists for each authorization protocol.
+			For example, if you are connecting to a OAuth2-based provider, you would implement OAuth2ServiceProvider.
+			After you've done this, your implementation can be used to conduct the OAuth2 dance and obtain an authorized API instance.
+			This is typically done in the context of a ConnectionFactory as part of establishing a new connection to the provider.
+			The following sections describe the implementation steps for each ServiceProvider type.
+		</p>
+		<div class="section" title="3.4.1&nbsp;OAuth2"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceprovider-oauth2"></a>3.4.1&nbsp;OAuth2</h3></div></div></div>
+			
+			<p>
+				To implement an OAuth2-based ServiceProvider, first create a subclass of AbstractOAuth2ServiceProvider named {ProviderId}ServiceProvider.
+				Parameterize &lt;A&gt; to be the Java binding to the ServiceProvider's's API.
+				Define a single constructor that accepts an clientId and clientSecret.
+				Finally, implement getApi(String) to return a new API instance.
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.facebook.connect.FacebookServiceProvider</code> as an example OAuth2ServiceProvider:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">final</span> <span class="hl-keyword">class</span> FacebookServiceProvider <span class="hl-keyword">extends</span> AbstractOAuth2ServiceProvider&lt;Facebook&gt; {
+
+    <span class="hl-keyword">public</span> FacebookServiceProvider(String clientId, String clientSecret) {
+        <span class="hl-keyword">super</span>(<span class="hl-keyword">new</span> OAuth2Template(clientId, clientSecret,
+            <span class="hl-string">"https://graph.facebook.com/oauth/authorize"</span>,
+            <span class="hl-string">"https://graph.facebook.com/oauth/access_token"</span>));
+    }
+
+    <span class="hl-keyword">public</span> Facebook getApi(String accessToken) {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> FacebookTemplate(accessToken);
+    }
+
+}
+			</pre>
+			<p>
+				In the constructor, you should call super, passing up the configured OAuth2Template that implements OAuth2Operations.
+				The OAuth2Template will handle the "OAuth dance" with the provider, and should be configured with the provided clientId and clientSecret, along with the provider-specific authorizeUrl and accessTokenUrl.
+			</p>
+			<p>
+				Some providers support provider sign-in (see <a class="xref" href="signin.html" title="5.&nbsp;Signing in with Service Provider Accounts">Chapter&nbsp;5, <i>Signing in with Service Provider Accounts</i></a>) through an authentication URL that is distinct from the authorization URL.
+				Using the OAuth2Template constructor as shown above will assume that the authentication URL is the same as the authorization URL.
+				But you may specify a different authentication URL by using OAuth2Template's other constructor.
+				Facebook does not have a separate authentication URL, but for the sake of the example, suppose that Facebook's authentication URL is "https://graph.facebook.com/oauth/authenticate".
+				The following implementation of the FacebookServiceProvider constructor configures the OAuth2Template for that case:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> FacebookServiceProvider(String clientId, String clientSecret) {
+    <span class="hl-keyword">super</span>(<span class="hl-keyword">new</span> OAuth2Template(clientId, clientSecret,
+        <span class="hl-string">"https://graph.facebook.com/oauth/authorize"</span>,
+        <span class="hl-string">"https://graph.facebook.com/oauth/authenticate"</span>,
+        <span class="hl-string">"https://graph.facebook.com/oauth/access_token"</span>));
+}
+			</pre>
+			<p>
+				In getApi(String), you should construct your API implementation, passing it the access token needed to make authorized requests for protected resources.
+			</p>
+		</div>
+		<div class="section" title="3.4.2&nbsp;OAuth1"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceprovider-oauth1"></a>3.4.2&nbsp;OAuth1</h3></div></div></div>
+			
+			<p>
+				To implement an OAuth1-based ServiceProvider, first create a subclass of AbstractOAuth1ServiceProvider named {ProviderId}ServiceProvider.
+				Parameterize &lt;A&gt; to be the Java binding to the ServiceProvider's API.
+				Define a single constructor that accepts a consumerKey and consumerSecret.
+				Finally, implement getApi(String, String) to return a new API instance.
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.twitter.connect.TwitterServiceProvider</code> as an example OAuth1ServiceProvider:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">final</span> <span class="hl-keyword">class</span> TwitterServiceProvider <span class="hl-keyword">extends</span> AbstractOAuth1ServiceProvider&lt;Twitter&gt; {
+
+    <span class="hl-keyword">public</span> TwitterServiceProvider(String consumerKey, String consumerSecret) {
+        <span class="hl-keyword">super</span>(consumerKey, consumerSecret, <span class="hl-keyword">new</span> OAuth1Template(consumerKey, consumerSecret, 
+            <span class="hl-string">"https://twitter.com/oauth/request_token"</span>,
+            <span class="hl-string">"https://twitter.com/oauth/authorize"</span>,
+            <span class="hl-string">"https://twitter.com/oauth/authenticate"</span>,
+            <span class="hl-string">"https://twitter.com/oauth/access_token"</span>));
+    }
+
+    <span class="hl-keyword">public</span> Twitter getApi(String accessToken, String secret) {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> TwitterTemplate(getConsumerKey(), getConsumerSecret(), accessToken, secret);
+    }
+
+}
+			</pre>
+			<p>
+				In the constructor, you should call super, passing up the the consumerKey, secret, and configured OAuth1Template.
+				The OAuth1Template will handle the "OAuth dance" with the provider.
+				It should be configured with the provided consumerKey and consumerSecret, along with the provider-specific requestTokenUrl, authorizeUrl, authenticateUrl, and accessTokenUrl.
+				The authenticateUrl parameter is optional and may be left out if the provider doesn't have an authentication URL that is different than the authorization URL. 
+			</p>			
+			<p>
+				As you can see here, OAuth1Template is constructed with Twitter's authentication URL (used for provider sign-in; see <a class="xref" href="signin.html" title="5.&nbsp;Signing in with Service Provider Accounts">Chapter&nbsp;5, <i>Signing in with Service Provider Accounts</i></a>), which is distinct from their authorization URL.
+				Some providers don't have separate URLs for authentication and authorization.
+				In those cases, you can use OAuth1Template's other constructor which doesn't take the authentication URL as a parameter.
+				For example, here's how the TwitterServiceProvider constructor would look without configuring the authentication URL:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterServiceProvider(String consumerKey, String consumerSecret) {
+    <span class="hl-keyword">super</span>(consumerKey, consumerSecret, <span class="hl-keyword">new</span> OAuth1Template(consumerKey, consumerSecret, 
+        <span class="hl-string">"https://twitter.com/oauth/request_token"</span>,
+        <span class="hl-string">"https://twitter.com/oauth/authorize"</span>,
+        <span class="hl-string">"https://twitter.com/oauth/access_token"</span>));
+}
+			</pre>
+			<p>
+				In getApi(String, String), you should construct your API implementation, passing it the four tokens needed to make authorized requests for protected resources.
+			</p>
+		</div>
+		<p>
+			Consult the JavaDoc API of the various service provider types for more information and subclassing options.
+		</p>
+	</div>
+	<div class="section" title="3.5&nbsp;Creating an ApiAdapter"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-serviceapiadapter"></a>3.5&nbsp;Creating an ApiAdapter</h2></div></div></div>
+		
+		<p>
+			As discussed in the previous chapter, one of the roles of a Connection is to provide a common abstraction for a linked user account that is applied across all service providers.
+			The role of the ApiAdapter is to map a provider's native API interface onto this uniform Connection model.
+			A connection delegates to its adapter to perform operations such as testing the validity of its API credentials, setting metadata values, fetching a user profile, and updating user status:
+			</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ApiAdapter&lt;A&gt; {
+
+    <span class="hl-keyword">boolean</span> test(A api);
+			
+    <span class="hl-keyword">void</span> setConnectionValues(A api, ConnectionValues values);
+
+    UserProfile fetchUserProfile(A api);
+	
+    <span class="hl-keyword">void</span> updateStatus(A api, String message);
+	
+}
+			</pre><p>
+			</p><p>
+				Consider <code class="code">org.springframework.social.twitter.connect.TwitterAdapter</code> as an example implementation:
+			</p><p>
+			</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TwitterAdapter <span class="hl-keyword">implements</span> ApiAdapter&lt;Twitter&gt; {
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">boolean</span> test(Twitter twitter) {
+        <span class="hl-keyword">try</span> {
+            twitter.userOperations().getUserProfile();
+            <span class="hl-keyword">return</span> true;
+        } <span class="hl-keyword">catch</span> (ApiException e) {
+            <span class="hl-keyword">return</span> false;
+        }
+    }
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> setConnectionValues(Twitter twitter, ConnectionValues values) {
+        TwitterProfile profile = twitter.userOperations().getUserProfile();
+        values.setProviderUserId(Long.toString(profile.getId()));
+        values.setDisplayName(<span class="hl-string">"@"</span> + profile.getScreenName());
+        values.setProfileUrl(profile.getProfileUrl());
+        values.setImageUrl(profile.getProfileImageUrl());
+    }
+    
+    <span class="hl-keyword">public</span> UserProfile fetchUserProfile(Twitter twitter) {
+        TwitterProfile profile = twitter.userOperations().getUserProfile();
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> UserProfileBuilder().setName(profile.getName()).setUsername(
+            profile.getScreenName()).build();
+    }
+    
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> updateStatus(Twitter twitter, String message) {
+        twitter.timelineOperations().updateStatus(message);	
+    }
+	
+}
+			</pre><p>
+		</p>
+		<p>
+			As you can see, test(...) returns true if the API instance is functional and false if it is not.
+			setConnectionValues(...) sets the connection's providerUserId, displayName, profileUrl, and imageUrl properties from TwitterProfile data.
+			fetchUserProfile(...) maps a TwitterProfile onto the normalized UserProfile model.
+			updateStatus(...) update's the user's Twitter status.
+			Consult the JavaDoc for ApiAdapter and Connection for more information and implementation guidance.
+			We also recommend reviewing the other ApiAdapter implementations for additional examples.
+		</p>
+	</div>
+	<div class="section" title="3.6&nbsp;Creating a ConnectionFactory"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-serviceproviderconnectionfactory"></a>3.6&nbsp;Creating a ConnectionFactory</h2></div></div></div>
+		
+		<p>
+			By now, you should have an API binding to the provider's API, a ServiceProvider&lt;A&gt; implementation for conducting the "authorization dance", and an ApiAdapter&lt;A&gt; implementation for mapping onto the uniform Connection model.
+			The last step in adding support for a new service provider is to create a ConnectionFactory that wraps up these artifacts and provides a simple interface for establishing Connections.
+			After this is done, you may use your connection factory directly, or you may add it to a registry where it can be used by the framework to establish connections in a dynamic, self-service manner.
+		</p>
+		<p>
+			Like a ServiceProvider&lt;A&gt;, a ConnectionFactory specialization exists for each authorization protocol.
+			For example, if you are adding support for a OAuth2-based provider, you would extend from OAuth2ConnectionFactory.
+			Implementation guidelines for each type are provided below.
+		</p>
+		<div class="section" title="3.6.1&nbsp;OAuth2"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceproviderconnectionfactory-oauth2"></a>3.6.1&nbsp;OAuth2</h3></div></div></div>
+			
+			<p>
+				Create a subclass of OAuth2ConnectionFactory&lt;A&gt; named {ProviderId}ConnectionFactory and parameterize A to be the Java binding to the service provider's API.
+				Define a single constructor that accepts a clientId and clientSecret.
+				Within the constructor call super, passing up the assigned providerId, a new {ProviderId}ServiceProvider instance configured with the clientId/clientSecret, and a new {Provider}Adapter instance. 			
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.facebook.connect.FacebookConnectionFactory</code> as an example OAuth2ConnectionFactory:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> FacebookConnectionFactory <span class="hl-keyword">extends</span> OAuth2ConnectionFactory&lt;Facebook&gt; {
+    <span class="hl-keyword">public</span> FacebookConnectionFactory(String clientId, String clientSecret) {
+        <span class="hl-keyword">super</span>(<span class="hl-string">"facebook"</span>, <span class="hl-keyword">new</span> FacebookServiceProvider(clientId, clientSecret), <span class="hl-keyword">new</span> FacebookAdapter());
+    }
+}
+			</pre>			
+		</div>		
+		<div class="section" title="3.6.2&nbsp;OAuth1"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceproviderconnectionfactory-oauth1"></a>3.6.2&nbsp;OAuth1</h3></div></div></div>
+			
+			<p>
+				Create a subclass of OAuth1ConnectionFactory&lt;A&gt; named {ProviderId}ConnectionFactory and parameterize A to be the Java binding to the service provider's API.
+				Define a single constructor that accepts a consumerKey and consumerSecret.
+				Within the constructor call super, passing up the assigned providerId, a new {ProviderId}ServiceProvider instance configured with the consumerKey/consumerSecret, and a new {Provider}Adapter instance. 			
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.twitter.connect.TwitterConnectionFactory</code> as an example OAuth1ConnectionFactory:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TwitterConnectionFactory <span class="hl-keyword">extends</span> OAuth1ConnectionFactory&lt;Facebook&gt; {
+    <span class="hl-keyword">public</span> TwitterConnectionFactory(String consumerKey, String consumerSecret) {
+        <span class="hl-keyword">super</span>(<span class="hl-string">"twitter"</span>, <span class="hl-keyword">new</span> TwitterServiceProvider(consumerKey, consumerSecret), <span class="hl-keyword">new</span> TwitterAdapter());
+    }
+}
+			</pre>
+			<p>
+				Consult the source and JavaDoc API for ConnectionFactory and its subclasses more information, examples, and advanced customization options.
+			</p>		
+		</div>
+	</div>		
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="serviceprovider.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="connecting.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">2.&nbsp;Service Provider 'Connect' Framework&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;4.&nbsp;Connecting to Service Providers</td></tr></table></div></body></html>

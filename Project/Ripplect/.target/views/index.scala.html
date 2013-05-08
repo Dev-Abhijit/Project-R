@@ -1,0 +1,102 @@
+@(post_threads: List[Post_thread], myreadForm: Form[MyData], recent_threads: List[MyData], userName: String, projects: List[Project], library: List[List[Book]])
+
+@import helper._
+
+
+@main("Home Page"){
+<div class="home-link">
+<a href="@routes.Application.home(userName)">My Home</a>
+</div>
+<div class="myread">
+<h3 id="myread-h3">My Recent Reads</h3>
+    <ul class="myread-ul">
+        @for(recent_thread <- recent_threads){
+
+            <li class="read">
+                @recent_thread.thread.header
+            </li>
+        }
+    </ul>
+<h3 id="mycollab-h3">My Collaborations</h3>
+<h3 id="mylib-h3">My Libraries</h3>
+<div class="sidebar-lib-home">
+@for(books <- library){
+<div class="sidebar-library">
+<div class="sidebar-shelf">
+<ul class="mylib-ul">
+@books.zipWithIndex.map{
+ case (book, i) => {
+<li class="book@i">
+<div  class="book">
+@if(book.thread.header.length() > 25){
+
+@book.thread.header.substring(0,25)..
+} else {
+@book.thread.header
+}
+</div>
+</li>
+}
+}
+</ul>
+<div class="shelf-stand">&nbsp;</div>
+
+
+
+</div>
+</div>
+
+}
+<div class="lib-home-link"><a href=@routes.Application.libHome(userName)>Library Home >></a></div>
+</div>
+</div>
+}{
+	<div class="content-home">
+
+	<div class="top-section">
+	<input type="text"></input> with <input type="text"></input> <input type="button" value="Ripplect" class="button"></input>
+
+	<input type="button" value="New Content" class="button"></input>
+	</div>
+
+    <ul>
+        @for(post_thread <- post_threads){
+
+            <li>
+
+            <div class="drop-shadow lifted" onClick="document.getElementById(@post_thread.id).click()">
+
+                <h4>@post_thread.header</h4>
+                @if(post_thread.image_loc != null){
+                <img src=@routes.Assets.at(post_thread.image_loc) width="100%">
+                }
+                <p>@post_thread.excerpt</p>
+                <h4>by @post_thread.user.name</h4>
+                @form(routes.Application.addRead(userName, post_thread.id)) {
+                    <input id ="@post_thread.id" type="button" onClick="submit()" style="visibility:hidden">
+                }
+            </div>
+            </li>
+        }
+    </ul>
+
+    <div class="project-list">
+
+    <ul>
+    @for(project <- projects){
+    <li class="project-single">
+    @project.title
+    <span class="grp-desc">@project.tagline</span>
+    <p class="grp-memb">30 Supporters</p>
+    </li>
+	}
+    </ul>
+
+    </div>
+    </div>
+
+}{
+	<div class="right-content">
+	<a href="" class="button-y">Yelp!</a>
+	</div>
+}

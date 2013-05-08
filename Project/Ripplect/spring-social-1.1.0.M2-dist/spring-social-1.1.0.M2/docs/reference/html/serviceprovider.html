@@ -1,0 +1,483 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>2.&nbsp;Service Provider 'Connect' Framework</title><link rel="stylesheet" href="css/manual-multipage.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"><link rel="home" href="index.html" title="Spring Social Reference Documentation"><link rel="up" href="index.html" title="Spring Social Reference Documentation"><link rel="prev" href="overview.html" title="1.&nbsp;Spring Social Overview"><link rel="next" href="implementing.html" title="3.&nbsp;Adding Support for a New Service Provider"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">2.&nbsp;Service Provider 'Connect' Framework</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="overview.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="implementing.html">Next</a></td></tr></table><hr></div><div class="chapter" title="2.&nbsp;Service Provider 'Connect' Framework"><div class="titlepage"><div><div><h2 class="title"><a name="serviceprovider"></a>2.&nbsp;Service Provider 'Connect' Framework</h2></div></div></div>
+	
+	<p>
+		The <code class="code">spring-social-core</code> module includes a <span class="emphasis"><em>Service Provider 'Connect' Framework</em></span> for managing connections to Software-as-a-Service (SaaS) providers such as Facebook and Twitter.
+		This framework allows your application to establish connections between local user accounts and accounts those users have with external service providers.  
+		Once a connection is established, it can be be used to obtain a strongly-typed Java binding to the ServiceProvider's API, giving your application the ability to invoke the API on behalf of a user.
+	</p>
+	<p>
+		To illustrate, consider Facebook as an example ServiceProvider.
+		Suppose your application, AcmeApp, allows users to share content with their Facebook friends.
+		To support this, a connection needs to be established between a user's AcmeApp account and her Facebook account.
+		Once established, a Facebook instance can be obtained and used to post content to the user's wall.
+		Spring Social's 'Connect' framework provides a clean API for managing service provider connections such as this.
+	</p>
+	<div class="section" title="2.1&nbsp;Core API"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-base-api"></a>2.1&nbsp;Core API</h2></div></div></div>
+		
+		<p>
+			The <code class="interfacename">Connection&lt;A&gt;</code> interface models a connection to an external service provider such as Facebook:
+			</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> Connection&lt;A&gt; {
+    
+    ConnectionKey getKey();
+    
+    String getDisplayName();
+
+    String getProfileUrl();
+
+    String getImageUrl();
+
+    <span class="hl-keyword">void</span> sync();
+
+    <span class="hl-keyword">boolean</span> test();
+
+    <span class="hl-keyword">boolean</span> hasExpired();
+
+    <span class="hl-keyword">void</span> refresh();
+
+    UserProfile fetchUserProfile();
+
+    <span class="hl-keyword">void</span> updateStatus(String message);
+
+    A getApi();
+
+    ConnectionData createData();
+
+}
+			</pre><p>
+		</p>
+		<p>
+			Each connection is uniquely identified by a composite key consisting of a providerId (e.g. 'facebook') and connected providerUserId (e.g. '1255689239', for Keith Donald's Facebook ID).
+			This key tells you what provider user the connection is connected to.
+		</p>
+		<p>
+			A connection has a number of meta-properties that can be used to render it on a screen, including a displayName, profileUrl, and imageUrl.
+			As an example, the following HTML template snippet could be used to generate a link to the connected user's profile on the provider's site:
+			</p><pre class="programlisting">
+<span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"${connection.imageUrl}"</span><span class="hl-tag"> /&gt;</span> <span class="hl-tag">&lt;a</span> <span class="hl-attribute">href</span>=<span class="hl-value">"${connection.profileUrl}"</span><span class="hl-tag">&gt;</span>${connection.displayName}<span class="hl-tag">&lt;/a&gt;</span>			
+			</pre><p>
+			The value of these properties may depend on the state of the provider user's profile.
+			In this case, sync() can be called to synchronize these values if the user's profile is updated.
+		</p>
+		<p>
+			A connection can be tested to determine if its authorization credentials are valid.
+			If invalid, the connection may have expired or been revoked by the provider.
+			If the connection has expired, a connection may be refreshed to renew its authorization credentials.
+		</p>
+		<p>
+			A connection provides several operations that allow the client application to invoke the ServiceProvider's API in a uniform way.
+			This includes the ability to fetch a model of the user's profile and update the user's status in the provider's system.
+		</p>
+		<p>
+			A connection's parameterized type &lt;A&gt; represents the Java binding to the ServiceProvider's native API.
+			An instance of this API binding can be obtained by calling <code class="code">getApi()</code>.
+			As an example, a Facebook connection instance would be parameterized as Connection&lt;Facebook&gt;.
+			<code class="code">getApi()</code> would return a Facebook instance that provides a Java binding to Facebook's graph API for a specific Facebook user.
+		</p>
+		<p>
+			Finally, the internal state of a connection can be captured for transfer between layers of your application by calling <code class="code">createData()</code>.
+			This could be used to persist the connection in a database, or serialize it over the network.
+		</p>
+		<p>
+			To put this model into action, suppose we have a reference to a Connection&lt;Twitter&gt; instance.
+			Suppose the connected user is the Twitter user with screen name 'kdonald'.
+			</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Connection#getKey() would return ('twitter', '14718006') where '14718006' is @kdonald's Twitter-assigned user id that never changes.</p></li><li class="listitem"><p>Connection#getDisplayName() would return '@kdonald'.</p></li><li class="listitem"><p>Connection#getProfileUrl() would return 'http://twitter.com/kdonald'.</p></li><li class="listitem"><p>Connection#getImageUrl() would return 'http://a0.twimg.com/profile_images/105951287/IMG_5863_2_normal.jpg'.</p></li><li class="listitem"><p>Connection#sync() would synchronize the state of the connection with @kdonald's profile.</p></li><li class="listitem">
+					<p>
+						Connection#test() would return true indicating the authorization credentials associated with the Twitter connection are valid.
+						This assumes Twitter has not revoked the AcmeApp client application, and @kdonald has not reset his authorization credentials (Twitter connections do not expire).
+					</p>
+				</li><li class="listitem"><p>Connection#hasExpired() would return false.</p></li><li class="listitem"><p>Connection#refresh() would not do anything since connections to Twitter do not expire.</p></li><li class="listitem"><p>Connection#fetchUserProfile() would make a remote API call to Twitter to get @kdonald's profile data and normalize it into a UserProfile model.</p></li><li class="listitem"><p>Connection#updateStatus(String) would post a status update to @kdonald's timeline.</p></li><li class="listitem"><p>Connection#getApi() would return a Twitter giving the client application access to the full capabilities of Twitter's native API.</p></li><li class="listitem"><p>Connection#createData() would return ConnectionData that could be serialized and used to restore the connection at a later time.</p></li></ol></div><p>
+		</p>
+	</div>
+	<div class="section" title="2.2&nbsp;Establishing connections"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-establishing-connections"></a>2.2&nbsp;Establishing connections</h2></div></div></div>
+		
+		<p>
+			So far we have discussed how existing connections are modeled, but we have not yet discussed how new connections are established.
+			The manner in which connections between local users and provider users are established varies based on the authorization protocol used by the ServiceProvider.
+			Some service providers use OAuth, others use Basic Auth, others may use something else.
+			Spring Social currently provides native support for OAuth-based service providers, including support for OAuth 1 and OAuth 2.
+			This covers the leading social networks, such as Facebook and Twitter, all of which use OAuth to secure their APIs.
+			Support for other authorization protocols can be added by extending the framework.
+		</p>
+		<p>
+			Each authorization protocol is treated as an implementation detail where protocol-specifics are kept out of the core Connection API.
+			A ConnectionFactory abstraction encapsulates the construction of connections that use a specific authorization protocol.
+			In the following sections, we will discuss the major ConnectionFactory classes provided by the framework.
+			Each section will also describe the protocol-specific flow required to establish a new connection.
+		</p>
+		<div class="section" title="2.2.1&nbsp;OAuth2 service providers"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-oauth2"></a>2.2.1&nbsp;OAuth2 service providers</h3></div></div></div>
+			
+			<p>
+				OAuth 2 is rapidly becoming a preferred authorization protocol, and is used by major service providers such as Facebook, Github, Foursquare, and 37signals.
+				In Spring Social, a OAuth2ConnectionFactory is used to establish connections with a OAuth2-based service provider:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> OAuth2ConnectionFactory&lt;A&gt; <span class="hl-keyword">extends</span> ConnectionFactory&lt;A&gt; {
+
+    <span class="hl-keyword">public</span> OAuth2Operations getOAuthOperations();
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(AccessGrant accessGrant);
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(ConnectionData data);
+
+}
+				</pre><p>
+			</p>
+			<p>
+				<code class="methodname">getOAuthOperations()</code> returns an API to use to conduct the authorization flow, or "OAuth Dance", with a service provider.
+				The result of this flow is an <code class="classname">AccessGrant</code> that can be used to establish a connection with a local user account by calling <code class="methodname">createConnection</code>.
+				The OAuth2Operations interface is shown below:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> OAuth2Operations {
+
+    String buildAuthorizeUrl(GrantType grantType, OAuth2Parameters parameters);
+
+    String buildAuthenticateUrl(GrantType grantType, OAuth2Parameters parameters);
+
+    AccessGrant exchangeForAccess(String authorizationCode, String redirectUri, 
+        MultiValueMap&lt;String, String&gt; additionalParameters);
+
+    AccessGrant refreshAccess(String refreshToken, String scope, 
+            MultiValueMap&lt;String, String&gt; additionalParameters);
+
+}
+			</pre>			
+			<p>
+				Callers are first expected to call buildAuthorizeUrl(GrantType, OAuth2Parameters) to construct the URL to redirect the user to for connection authorization.
+				Upon user authorization, the authorizationCode returned by the provider should be exchanged for an AccessGrant.
+				The AccessGrant should then used to create a connection.
+				This flow is illustrated below:
+			</p>
+			<div class="mediaobject" align="center"><img src="images/oauth2_flow.png" align="middle"></div>
+      		<p>
+				As you can see, there is a back-and-forth conversation that takes place between the application and the service provider to grant the application access to the provider account.
+				This exchange, commonly known as the "OAuth Dance", follows these steps:
+			</p>
+			<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+					<p>
+						The flow starts by the application redirecting the user to the provider's authorization URL.
+						Here the provider displays a web page asking the user if he or she wishes to grant the application access to read and update their data.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The user agrees to grant the application access.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider redirects the user back to the application (via the redirect URI), passing an authorization code as a parameter.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application exchanges the authorization code for an access grant.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider issues the access grant to the application.
+						The grant includes an access token and a refresh token.
+						One receipt of these tokens, the "OAuth dance" is complete.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application uses the AccessGrant to establish a connection between the local user account and the external provider account.
+						With the connection established, the application can now obtain a reference to the Service API and invoke the provider on behalf of the user.
+					</p>
+				</li></ol></div>
+			<p>
+			 	The example code below shows use of a FacebookConnectionFactory to create a connection to Facebook using the OAuth2 server-side flow illustrated above.
+				Here, FacebookConnectionFactory is a subclass of OAuth2ConnectionFactory:
+				</p><pre class="programlisting">
+FacebookConnectionFactory connectionFactory = 
+    <span class="hl-keyword">new</span> FacebookConnectionFactory(<span class="hl-string">"clientId"</span>, <span class="hl-string">"clientSecret"</span>);
+OAuth2Operations oauthOperations = connectionFactory.getOAuthOperations();
+OAuth2Parameters params = <span class="hl-keyword">new</span> OAuth2Parameters();
+params.setRedirectUri(<span class="hl-string">"https://my-callback-url"</span>);
+String authorizeUrl = oauthOperations.buildAuthorizeUrl(GrantType.AUTHORIZATION_CODE, params);
+response.sendRedirect(authorizeUrl);
+
+<span class="hl-comment">// upon receiving the callback from the provider:</span>
+AccessGrant accessGrant = oauthOperations.exchangeForAccess(authorizationCode, <span class="hl-string">"https://my-callback-url"</span>, null);
+Connection&lt;Facebook&gt; connection = connectionFactory.createConnection(accessGrant);
+				</pre><p>
+			</p>
+			<p>
+				The following example illustrates the client-side "implicit" authorization flow also supported by OAuth2.
+				The difference between this flow and the server-side "authorization code" flow above is the provider callback directly contains the access grant (no additional exchange is necessary).
+				This flow is appropriate for clients incapable of keeping the access grant credentials confidential, such as a mobile device or JavaScript-based user agent.
+				</p><pre class="programlisting">
+FacebookConnectionFactory connectionFactory = 
+    <span class="hl-keyword">new</span> FacebookConnectionFactory(<span class="hl-string">"clientId"</span>, <span class="hl-string">"clientSecret"</span>);
+OAuth2Operations oauthOperations = connectionFactory.getOAuthOperations();
+OAuth2Parameters params = <span class="hl-keyword">new</span> OAuth2Parameters();
+params.setRedirectUri(<span class="hl-string">"https://my-callback-url"</span>);
+String authorizeUrl = oauthOperations.buildAuthorizeUrl(GrantType.IMPLICIT_GRANT, params);
+response.sendRedirect(authorizeUrl);
+
+<span class="hl-comment">// upon receiving the callback from the provider:</span>
+AccessGrant accessGrant = <span class="hl-keyword">new</span> AccessGrant(accessToken);
+Connection&lt;Facebook&gt; connection = connectionFactory.createConnection(accessGrant);
+				</pre><p>
+			</p>
+		</div>
+		<div class="section" title="2.2.2&nbsp;OAuth1 service providers"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-oauth1"></a>2.2.2&nbsp;OAuth1 service providers</h3></div></div></div>
+			
+			OAuth 1 is the previous version of the OAuth protocol.
+			It is more complex OAuth 2, and sufficiently different that it is supported separately.
+			Twitter, Linked In, and TripIt are some of the well-known ServiceProviders that use OAuth 1.
+			In Spring Social, the OAuth1ConnectionFactory allows you to create connections to a OAuth1-based Service Provider:			
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> OAuth1ConnectionFactory&lt;A&gt; <span class="hl-keyword">extends</span> ConnectionFactory&lt;A&gt; {
+
+    <span class="hl-keyword">public</span> OAuth1Operations getOAuthOperations();
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(OAuthToken accessToken);
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(ConnectionData data);
+
+}
+			</pre>
+			<p>
+				Like a OAuth2-based provider, <code class="methodname">getOAuthOperations()</code> returns an API to use to conduct the authorization flow, or "OAuth Dance".
+				The result of the OAuth 1 flow is an <code class="classname">OAuthToken</code> that can be used to establish a connection with a local user account by calling <code class="methodname">createConnection</code>.
+				The OAuth1Operations interface is shown below:				
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> OAuth1Operations {
+
+    OAuthToken fetchRequestToken(String callbackUrl, 
+        MultiValueMap&lt;String, String&gt; additionalParameters);
+
+    String buildAuthorizeUrl(String requestToken, OAuth1Parameters parameters);
+
+    String buildAuthenticateUrl(String requestToken, OAuth1Parameters parameters);
+
+    OAuthToken exchangeForAccessToken(AuthorizedRequestToken requestToken, 
+        MultiValueMap&lt;String, String&gt; additionalParameters);
+
+}
+			</pre>			
+			<p>
+				Callers are first expected to call fetchNewRequestToken(String) to obtain a temporary token from the ServiceProvider to use during the authorization session.
+				Next, callers should call buildAuthorizeUrl(String, OAuth1Parameters) to construct the URL to redirect the user to for connection authorization.
+				Upon user authorization, the authorized request token returned by the provider should be exchanged for an access token.
+				The access token should then used to create a connection.
+				This flow is illustrated below:				
+			</p>
+			<div class="mediaobject" align="center"><img src="images/oauth1_flow.png" align="middle"></div>
+			<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+					<p>
+						The flow starts with the application asking for a request token.
+						The purpose of the request token is to obtain user approval and it can only be used to obtain an access token.
+						In OAuth 1.0a, the consumer callback URL is passed to the provider when asking for a request token.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider issues a request token to the consumer.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application redirects the user to the provider's authorization page, passing the request token as a parameter.
+						In OAuth 1.0, the callback URL is also passed as a parameter in this step.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider prompts the user to authorize the consumer application and the user agrees.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider redirects the user's browser back to the application (via the callback URL).
+						In OAuth 1.0a, this redirect includes a verifier code as a parameter. At this point, the request token is authorized.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application exchanges the authorized request token (including the verifier in OAuth 1.0a) for an access token.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider issues an access token to the consumer. The "dance" is now complete.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application uses the access token to establish a connection between the local user account and the external provider account.
+						With the connection established, the application can now obtain a reference to the Service API and invoke the provider on behalf of the user.
+					</p>
+				</li></ol></div>
+			<p>
+				The example code below shows use of a TwitterConnectionFactory to create a connection to Facebook using the OAuth1 server-side flow illustrated above.
+				Here, TwitterConnectionFactory is a subclass of OAuth1ConnectionFactory:
+				</p><pre class="programlisting">
+TwitterConnectionFactory connectionFactory = 
+    <span class="hl-keyword">new</span> TwitterConnectionFactory(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>);
+OAuth1Operations oauthOperations = connectionFactory.getOAuthOperations();
+OAuthToken requestToken = oauthOperations.fetchRequestToken(<span class="hl-string">"https://my-callback-url"</span>, null);
+String authorizeUrl = oauthOperations.buildAuthorizeUrl(requestToken, OAuth1Parameters.NONE);
+response.sendRedirect(authorizeUrl);
+
+<span class="hl-comment">// upon receiving the callback from the provider:</span>
+OAuthToken accessToken = oauthOperations.exchangeForAccessToken(
+    <span class="hl-keyword">new</span> AuthorizedRequestToken(requestToken, oauthVerifier), null);
+Connection&lt;Twitter&gt; connection = connectionFactory.createConnection(accessToken);
+				</pre><p>
+			</p>
+		</div>
+		<div class="section" title="2.2.3&nbsp;Registering ConnectionFactory instances"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-establishing-connections-connection-factory-registry"></a>2.2.3&nbsp;Registering ConnectionFactory instances</h3></div></div></div>
+			
+			<p>
+				As you will see in subsequent sections of this reference guide, Spring Social provides infrastructure for establishing connections to one or more providers in a dynamic, self-service manner.
+				For example, one client application may allow users to connect to Facebook, Twitter, and LinkedIn. Another might integrate Github and Pivotal Tracker.
+				To make the set of connectable providers easy to manage and locate, Spring Social provides a registry for centralizing connection factory instances:
+			</p>
+			<pre class="programlisting">
+ConnectionFactoryRegistry registry = <span class="hl-keyword">new</span> ConnectionFactoryRegistry();
+registry.addConnectionFactory(<span class="hl-keyword">new</span> FacebookConnectionFactory(<span class="hl-string">"clientId"</span>, <span class="hl-string">"clientSecret"</span>));
+registry.addConnectionFactory(<span class="hl-keyword">new</span> TwitterConnectionFactory(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>));
+registry.addConnectionFactory(<span class="hl-keyword">new</span> LinkedInConnectionFactory(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>));	
+			</pre>
+			<p>
+				This registry implements a locator interface that other objects can use to lookup connection factories dynamically:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectionFactoryLocator {
+
+    ConnectionFactory&lt;?&gt; getConnectionFactory(String providerId);
+
+    &lt;A&gt; ConnectionFactory&lt;A&gt; getConnectionFactory(Class&lt;A&gt; apiType);
+	
+    Set&lt;String&gt; registeredProviderIds();
+
+}	
+			</pre>
+			<p>
+				Example usage of a ConnectionFactoryLocator is shown below:
+			</p>
+			<pre class="programlisting">
+<span class="hl-comment">// generic lookup by providerId</span>
+ConnectionFactory&lt;?&gt; connectionFactory = locator.getConnectionFactory(<span class="hl-string">"facebook"</span>);
+
+<span class="hl-comment">// typed lookup by service api type</span>
+ConnectionFactory&lt;Facebook&gt; connectionFactory = locator.getConnectionFactory(Facebook.<span class="hl-keyword">class</span>);	
+			</pre>			
+		</div>
+	</div>
+	<div class="section" title="2.3&nbsp;Persisting connections"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-persisting-connections"></a>2.3&nbsp;Persisting connections</h2></div></div></div>
+		
+		<p>
+			After a connection has been established, you may wish to persist it for later use.
+			This makes things convenient for the user since a connection can simply be restored from its persistent form and does not need to be established again.
+			Spring Social provides a ConnectionRepository interface for managing the persistence of a user's connections:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectionRepository {
+
+    MultiValueMap&lt;String, Connection&lt;?&gt;&gt; findAllConnections();
+	
+    List&lt;Connection&lt;?&gt;&gt; findConnections(String providerId);
+
+    &lt;A&gt; List&lt;Connection&lt;A&gt;&gt; findConnections(Class&lt;A&gt; apiType);
+
+    MultiValueMap&lt;String, Connection&lt;?&gt;&gt; findConnectionsToUsers(
+        MultiValueMap&lt;String, String&gt; providerUserIds);
+
+    Connection&lt;?&gt; getConnection(ConnectionKey connectionKey);
+
+    &lt;A&gt; Connection&lt;A&gt; getConnection(Class&lt;A&gt; apiType, String providerUserId);	
+
+    &lt;A&gt; Connection&lt;A&gt; getPrimaryConnection(Class&lt;A&gt; apiType);
+
+    &lt;A&gt; Connection&lt;A&gt; findPrimaryConnection(Class&lt;A&gt; apiType);
+	
+    <span class="hl-keyword">void</span> addConnection(Connection&lt;?&gt; connection);
+
+    <span class="hl-keyword">void</span> updateConnection(Connection&lt;?&gt; connection);
+
+    <span class="hl-keyword">void</span> removeConnections(String providerId);
+
+    <span class="hl-keyword">void</span> removeConnection(ConnectionKey connectionKey);
+
+}
+		</pre>
+		<p>
+			As you can see, this interface provides a number of operations for adding, updating, removing, and finding Connections.
+			Consult the JavaDoc API of this interface for a full description of these operations.
+			Note that all operations on this repository are scoped relative to the "current user" that has authenticated with your local application.
+			For standalone, desktop, or mobile environments that only have one user this distinction isn't important.
+			In a multi-user web application environment, this implies ConnectionRepository instances will be request-scoped.
+		</p>
+		<p>
+			For multi-user environments, Spring Social provides a UsersConnectionRepository that provides access to the global store of connections across all users:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> UsersConnectionRepository {
+
+    List&lt;String&gt; findUserIdsWithConnection(Connection&lt;?&gt; connection);
+
+    Set&lt;String&gt; findUserIdsConnectedTo(String providerId, Set&lt;String&gt; providerUserIds);
+
+    ConnectionRepository createConnectionRepository(String userId);
+
+}
+		</pre>
+		<p>
+			As you can see, this repository acts as a factory for ConnectionRepository instances scoped to a single user, as well as exposes a number of multi-user operations.
+			These operations include the ability to lookup the local userIds associated with connections to support provider user sign-in and "registered friends" scenarios.
+			Consult the JavaDoc API of this interface for a full description.
+		</p>
+		<div class="section" title="2.3.1&nbsp;JDBC-based persistence"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-persisting-connections-jdbc"></a>2.3.1&nbsp;JDBC-based persistence</h3></div></div></div>
+			
+			<p>
+				Spring Social provides a JdbcUsersConnectionRepository implementation capable of persisting connections to a RDBMS.
+				The database schema designed to back this repository is defined as follows:
+			</p>
+			
+  			<pre class="programlisting">
+create table UserConnection (userId varchar(255) not null,
+    providerId varchar(255) not null,
+    providerUserId varchar(255),
+    rank int not null,
+    displayName varchar(255),
+    profileUrl varchar(512),
+    imageUrl varchar(512),
+    accessToken varchar(255) not null,					
+    secret varchar(255),
+    refreshToken varchar(255),
+    expireTime bigint,
+    primary key (userId, providerId, providerUserId));
+create unique index UserConnectionRank on UserConnection(userId, providerId, rank);
+  			</pre>
+
+			<p>
+				For convenience is bootstrapping the schema from a running application, this schema definition is available in the <code class="code">spring-social-core</code> module as a resource at the path /org/springframework/social/connect/jdbc/JdbcUsersConnectionRepository.sql.
+				Note that although this schema was designed with compatibility in mind, it may not be compatible with all databases.
+				You may need to adapt this schema definition to accommodate any peculiarities of your chosen database.
+			</p>
+
+			<p>
+				The implementation also provides support for encrypting authorization credentials so they are not stored in plain-text.
+			</p>
+			
+			<p>
+				The example code below demonstrates construction and usage of a JdbcUsersConnectionRepository:
+			</p>
+			<pre class="programlisting">
+<span class="hl-comment">// JDBC DataSource pointing to the DB where connection data is stored</span>
+DataSource dataSource = ...;
+
+<span class="hl-comment">// locator for factories needed to construct Connections when restoring from persistent form</span>
+ConnectionFactoryLocator connectionFactoryLocator = ...;
+
+<span class="hl-comment">// encryptor of connection authorization credentials</span>
+TextEncryptor encryptor = ...;
+
+UsersConnectionRepository usersConnectionRepository =
+    <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(dataSource, connectionFactoryLocator, encryptor);
+
+<span class="hl-comment">// create a connection repository for the single-user 'kdonald'</span>
+ConnectionRepository repository = usersConnectionRepository.createConnectionRepository(<span class="hl-string">"kdonald"</span>);
+
+<span class="hl-comment">// find kdonald's primary Facebook connection</span>
+Connection&lt;Facebook&gt; connection = repository.findPrimaryConnection(Facebook.<span class="hl-keyword">class</span>);
+			</pre>
+		</div>
+	</div>
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="overview.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="implementing.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">1.&nbsp;Spring Social Overview&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;3.&nbsp;Adding Support for a New Service Provider</td></tr></table></div></body></html>

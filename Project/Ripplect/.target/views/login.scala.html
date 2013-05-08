@@ -1,0 +1,109 @@
+@(myLoginForm : Form[User], mySignInForm : Form[User])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@logintemplate("Login Page"){
+<div class="login-main">
+<table width="100%">
+<tr>
+<td width="5%">
+</td>
+<td width="60%" valign="top">
+<div class="login-form">
+<div class="drop-shadow lifted">
+<div class="login-wrapper">
+
+<h3> Have an account?</h3>
+@helper.form(action = routes.Application.authenticate) {
+<ul><li>
+            @inputText(
+                myLoginForm("username"),
+                '_label -> "Username",
+                '_help -> "",
+                '_error -> myLoginForm.globalError
+            )
+            </li><li>
+            @inputPassword(
+                myLoginForm("password"),
+                '_label -> "Password",
+                '_help -> ""
+            )
+</li><li>
+<input type="submit" value="Login" class="button-create">
+</li></ul>
+}
+</div>
+</div>
+<div class="drop-shadow-lifted">
+<div class="signin-wrapper">
+
+<h3> New user? Register here.</h3>
+@helper.form(action = routes.Application.signIn) {
+            @inputText(
+                mySignInForm("username"),
+                '_label -> "Username",
+                '_help -> "Enter a valid email address"
+            )
+
+
+            @inputPassword(
+                mySignInForm("password"),
+                '_label -> "Password",
+                '_help -> "A password must be at least 6 characters. "
+            )
+
+            @inputPassword(
+                mySignInForm("repeatPassword"),
+                '_label -> "Repeat Password",
+                '_help -> "Please repeat your password again.",
+                '_error -> mySignInForm.error("password")
+
+                  )
+            <div id="hobbies-section">
+           <div class="hobb" id="first">
+              @checkbox(field=mySignInForm("Film"))
+            <img src="@routes.Assets.at("images/movies.jpg")">
+            </div>
+             <div class="hobb" id="second">
+               @checkbox(field=mySignInForm("Music"))
+                <img src="@routes.Assets.at("images/violin.jpg")" width="150" height="150">
+              </div>
+              <div class="hobb" id="third">
+               @checkbox(field=mySignInForm("Photography"))
+               <img src="@routes.Assets.at("images/07_color.jpg")" width="150" height="150">
+               </div>
+              <div class="hobb" id="fourth">
+              @checkbox(field=mySignInForm("Technology"))
+             <img src="@routes.Assets.at("images/10_techno.jpg")" width="150" height="150">
+             </div>
+             <div class="hobb" id="fifth">
+              @checkbox(field=mySignInForm("Travel"))
+            <img src="@routes.Assets.at("images/11_travel.jpg")" width="150" height="150">
+            </div>
+            <div class="hobb" id="sixth">
+              @checkbox(field=mySignInForm("Cooking"))
+            <img src="@routes.Assets.at("images/12_cook.jpg")" width="150" height="150">
+            </div>
+            <div class="hobb" id="seventh">
+              @checkbox(field=mySignInForm("Sports"))
+            <img src="@routes.Assets.at("images/opinion/football_images.jpg")" width="150" height="150">
+            </div>
+            <div class="hobb" id="eighth">
+              @checkbox(field=mySignInForm("Painting"))
+            <img src="@routes.Assets.at("images/13_paint.jpg")" width="150" height="150">
+            </div>
+            <div class="hobb" id="ninth">
+              @checkbox(field=mySignInForm("Dance"))
+            <img src="@routes.Assets.at("images/14_dance.jpg")" width="150" height="150">
+            </div>
+            </div>
+<div id="thebutton">            
+<input type="submit" value="Sign_In" class="button-create">
+</div>
+}
+</div>
+</div>
+</div>
+</td>
+}

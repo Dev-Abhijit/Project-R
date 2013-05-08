@@ -1,0 +1,156 @@
+@(post_thread: Post_thread, myreadForm: Form[MyData], recent_threads: List[MyData], userName: String, books: List[Book], library: List[List[Book]], libs : List[Library_meta], contMatrix : List[Post_thread])
+
+@import helper._
+
+
+@main("Home Page"){
+<div class="home-link">
+<a href="@routes.Application.home(userName)">My Home</a>
+</div>
+<div class="myread">
+<h3 id="myread-h3">My Recent Reads</h3>
+    <ul class="myread-ul">
+        @for(recent_thread <- recent_threads){
+
+            <li class="read">
+                @recent_thread.thread.header
+            </li>
+        }
+    </ul>
+<h3>My Collaborations</h3>
+<h3>My Libraries</h3><div class="sidebar-lib-home">
+@for(books <- library){
+<div class="sidebar-library">
+<div class="sidebar-shelf">
+<ul class="mylib-ul">
+@books.zipWithIndex.map{
+ case (book, i) => {
+<li class="book@i">
+<div  class="book">
+@if(book.thread.header.length() > 25){
+
+@book.thread.header.substring(0,25)..
+} else {
+@book.thread.header
+}
+</div>
+</li>
+}
+}
+</ul>
+<div class="shelf-stand">&nbsp;</div>
+
+
+
+</div>
+</div>
+
+}
+<div class="lib-home-link"><a href=@routes.Application.libHome(userName)>Library Home >></a></div>
+</div>
+</div>
+
+}{
+	<div class="content-home">
+		<div class="wrap">
+
+		<h4>@post_thread.header</h4>
+
+		<div class="content-two-col">
+
+
+		<div class="first-para">
+		<p>
+		@post_thread.excerpt
+		</p>
+		</div>
+		@if(post_thread.image_loc != null){
+		<center>
+		<img src=@routes.Assets.at(post_thread.image_loc) width="300">
+		</center>
+		}
+		@if(post_thread.content == null) {
+			Sorry, No content entered!
+		} else {
+		@Html(post_thread.content)
+		}
+
+		</div>
+
+
+		</div>
+        @helper.form(action = routes.Application.addToMyLib(userName, post_thread.id)) {
+		<fieldset>
+           <legend>Librarian's Desk</legend>
+           <select name="shelf_Id" onChange="submit()">
+           <option value="">Add to Library</option>
+           @for(lib <- libs){
+                 <option value="@lib.Id">@lib.name</option>
+           }
+           </select>
+           <div id='basic-modal'>
+			<input type='button' name='basic' value='Ripplect' class="basic"/>
+			</div>
+
+			<!-- modal content -->
+			<div id="basic-modal-content">
+				<h3>Choose a content to Ripplect it!</h3>
+				<div class="myripplect">
+				<ul>
+				<h4>From the recent reads</h4>
+					@for(recent_thread <- recent_threads){
+
+						<li class="read">
+							@recent_thread.thread.header
+						</li>
+					}
+				</ul>
+				</div>
+
+				<div class="myripplect">
+					<h4>From my library</h3>
+					<ul>
+					@for(books <- library){
+					@for(book <- books){
+					<li class="read">
+					@book.thread.header
+					}
+					</li>
+					}
+					</ul>
+				</div>
+
+			</div>
+
+			<!-- preload the images -->
+			<div style='display:none'>
+				<img src=@routes.Assets.at("images/x.png") alt="">
+			</div>
+		</fieldset>
+
+
+        }
+        <ul class="cont-matrix">
+        @for(cont <- contMatrix){
+            <li class="matrix-li">
+            <div class="drop-shadow lifted" onClick="document.getElementById(@post_thread.id).click()">
+
+                <h4>@cont.header</h4>
+                @if(cont.image_loc != null){
+                <img src=@routes.Assets.at(cont.image_loc) width="100%">
+                } else {
+                <p>@cont.excerpt</p>
+                }
+                @form(routes.Application.addRead(userName, cont.id)) {
+                    <input id ="@post_thread.id" type="button" onClick="submit()" style="visibility:hidden">
+                }
+            </div>
+            </li>
+        }
+        </ul>
+
+    </div>
+
+}{
+<h3>Testing</h3>
+}

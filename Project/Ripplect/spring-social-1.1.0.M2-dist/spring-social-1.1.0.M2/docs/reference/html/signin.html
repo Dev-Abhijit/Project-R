@@ -1,0 +1,385 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>5.&nbsp;Signing in with Service Provider Accounts</title><link rel="stylesheet" href="css/manual-multipage.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"><link rel="home" href="index.html" title="Spring Social Reference Documentation"><link rel="up" href="index.html" title="Spring Social Reference Documentation"><link rel="prev" href="connecting.html" title="4.&nbsp;Connecting to Service Providers"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">5.&nbsp;Signing in with Service Provider Accounts</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="connecting.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;</td></tr></table><hr></div><div class="chapter" title="5.&nbsp;Signing in with Service Provider Accounts"><div class="titlepage"><div><div><h2 class="title"><a name="signin"></a>5.&nbsp;Signing in with Service Provider Accounts</h2></div></div></div>
+	
+
+	<div class="section" title="5.1&nbsp;Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="signin_introduction"></a>5.1&nbsp;Introduction</h2></div></div></div>
+		
+		<p>
+			In order to ease sign in for their users, many applications allow sign in with a service provider such as Twitter or Facebook.
+			With this authentication technique, the user signs into (or may already be signed into) his or her provider account.
+			The application then tries to match that provider account to a local user account.
+			If a match is found, the user is automatically signed into the application.
+		</p>
+		<p>
+			Spring Social supports such service provider-based authentication with <code class="classname">ProviderSignInController</code> from the <code class="code">spring-social-web</code> module.
+			<code class="classname">ProviderSignInController</code> works very much like <code class="classname">ConnectController</code> in that it goes through the OAuth flow (either OAuth 1 or OAuth 2, depending on the provider).
+			Instead of creating a connection at the end of process, however, <code class="classname">ProviderSignInController</code> attempts to find a previously established connection and uses the connected account to authenticate the user with the application.
+			If no previous connection matches, the flow will be sent to the application's sign up page so that the user may register with the application.
+		</p>
+	</div>
+
+	<div class="section" title="5.2&nbsp;Enabling provider sign in"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="signin_using"></a>5.2&nbsp;Enabling provider sign in</h2></div></div></div>
+		
+		<p>
+			To add provider sign in capability to your Spring application, configure <code class="classname">ProviderSignInController</code> as a bean in your Spring MVC application:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ProviderSignInController providerSignInController() {
+    <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> ProviderSignInController(connectionFactoryLocator(), 
+        usersConnectionRepository(), <span class="hl-keyword">new</span> SimpleSignInAdapter());
+}
+		</pre>
+		<p>
+			Or in XML, if you prefer:
+		</p>		
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ProviderSignInController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>    
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+		    As with <code class="classname">ConnectController</code>, <code class="classname">ProviderSignInController</code> uses information from the request to determine the protocol, host name, and port number to use when creating a callback URL.
+			But you may set the <code class="code">applicationUrl</code> property to the base external URL of your application to overcome any problems where the request refers to an internal server.
+			For example:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ProviderSignInController providerSignInController() {
+    ProviderSignInController controller = <span class="hl-keyword">new</span> ProviderSignInController(connectionFactoryLocator(), 
+        usersConnectionRepository(), <span class="hl-keyword">new</span> SimpleSignInAdapter());
+    controller.setApplicationUrl(environment.getProperty(<span class="hl-string">"application.url"</span>));
+    <span class="hl-keyword">return</span> controller;
+}
+		</pre>
+		<p>
+			Or when configured in XML:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ProviderSignInController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>    
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"applicationUrl"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${application.url}"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			Once again, we recommend that you externalize the value of the application URL since it will vary between deployment environments.
+		</p>
+		<p>
+			When authenticating via an OAuth 2 provider, <code class="classname">ProviderSignInController</code> supports the following flow:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">POST /signin/{providerId}</code> - Initiates the sign in flow by redirecting to the provider's authentication endpoint.</p></li><li class="listitem"><p><code class="code">GET /signin/{providerId}?code={verifier}</code> - Receives the authentication callback from the provider, accepting a code. Exchanges this code for an access token. Using this access token, it retrieves the user's provider user ID and uses that to lookup a connected account and then authenticates to the application through the sign in service. </p>
+				<div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+						<p>
+							If the provider user ID doesn't match any existing connection, <code class="classname">ProviderSignInController</code> will redirect to a sign up URL. 
+							The default sign up URL is "/signup" (relative to the application root), but can be customized by setting the <code class="code">signUpUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If the provider user ID matches more than one existing connection, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL to offer the user a chance to sign in through another provider or with their username and password.
+							The request to the sign in URL will have an "error" query parameter set to "multiple_users" to indicate the problem so that the page can communicate it to the user.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If any error occurs while fetching the access token or while fetching the user's profile data, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL.
+							The request to the sign in URL will have an "error" query parameter set to "provider" to indicate an error occurred while communicating with the provider.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li></ul></div>
+			</li></ul></div>
+		<p>
+			For OAuth 1 providers, the flow is only slightly different:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">POST /signin/{providerId}</code> - Initiates the sign in flow. This involves fetching a request token from the provider and then redirecting to Provider's authentication endpoint.</p>
+				<div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+						<p>
+							If any error occurs while fetching the request token, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL.
+							The request to the sign in URL will have an "error" query parameter set to "provider" to indicate an error occurred while communicating with the provider.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li></ul></div>
+			</li><li class="listitem"><p><code class="code">GET /signin/{providerId}?oauth_token={request token}&amp;oauth_verifier={verifier}</code> - Receives the authentication callback from the provider, accepting a verification code. Exchanges this verification code along with the request token for an access token. Using this access token, it retrieves the user's provider user ID and uses that to lookup a connected account and then authenticates to the application through the sign in service. </p>
+				<div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+						<p>
+							If the provider user ID doesn't match any existing connection, <code class="classname">ProviderSignInController</code> will redirect to a sign up URL. 
+							The default sign up URL is "/signup" (relative to the application root), but can be customized by setting the <code class="code">signUpUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If the provider user ID matches more than one existing connection, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL to offer the user a chance to sign in through another provider or with their username and password.
+							The request to the sign in URL will have an "error" query parameter set to "multiple_users" to indicate the problem so that the page can communicate it to the user.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If any error occurs when exchanging the request token for an access token or while fetching the user's profile data, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL.
+							The request to the sign in URL will have an "error" query parameter set to "provider" to indicate an error occurred while communicating with the provider.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li></ul></div>
+			</li></ul></div>
+		<div class="section" title="5.2.1&nbsp;ProviderSignInController's dependencies"><div class="titlepage"><div><div><h3 class="title"><a name="d4e846"></a>5.2.1&nbsp;ProviderSignInController's dependencies</h3></div></div></div>
+			
+			<p>
+				As shown in the Java-based configuration above, <code class="classname">ProviderSignInController</code> depends on a handful of other objects to do its job.
+			</p>
+			<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>A <code class="interfacename">ConnectionFactoryLocator</code> to lookup the ConnectionFactory used to create the Connection to the provider.</p></li><li class="listitem"><p>A <code class="interfacename">UsersConnectionRepository</code> to find the user that has the connection to the provider user attempting to sign in.</p></li><li class="listitem"><p>A <code class="interfacename">SignInAdapter</code> to sign a user into the application when a matching connection is found.</p></li></ul></div>
+			<p>
+				When using XML configuration, it isn't necessary to explicitly configure these constructor arguments because <code class="classname">ProviderSignInController</code>'s constructor is annotated with <code class="code">@Inject</code>.
+				Those dependencies will be given to <code class="classname">ProviderSignInController</code> via autowiring.
+				You'll still need to make sure they're available as beans in the Spring application context so that they can be autowired.
+			</p>
+			<p>
+				You should have already configured most of these dependencies when setting up connection support (in the previous chapter).
+				But when used with <code class="classname">ProviderSignInController</code>, you should configure them to be created as scoped proxies:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<i><span class="hl-annotation" style="color: gray">@Scope(value="singleton", proxyMode=ScopedProxyMode.INTERFACES)</span></i>
+<span class="hl-keyword">public</span> ConnectionFactoryLocator connectionFactoryLocator() {
+    ConnectionFactoryRegistry registry = <span class="hl-keyword">new</span> ConnectionFactoryRegistry();
+    
+    registry.addConnectionFactory(<span class="hl-keyword">new</span> FacebookConnectionFactory(
+        environment.getProperty(<span class="hl-string">"facebook.clientId"</span>),
+        environment.getProperty(<span class="hl-string">"facebook.clientSecret"</span>)));
+            
+    registry.addConnectionFactory(<span class="hl-keyword">new</span> TwitterConnectionFactory(
+        environment.getProperty(<span class="hl-string">"twitter.consumerKey"</span>),
+        environment.getProperty(<span class="hl-string">"twitter.consumerSecret"</span>)));
+            
+    <span class="hl-keyword">return</span> registry;
+}
+
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<i><span class="hl-annotation" style="color: gray">@Scope(value="singleton", proxyMode=ScopedProxyMode.INTERFACES)</span></i>
+<span class="hl-keyword">public</span> UsersConnectionRepository usersConnectionRepository() {
+    <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(dataSource, connectionFactoryLocator(), textEncryptor);
+}
+			</pre>	
+			<p>
+				In the event that the sign in attempt fails, the sign in attempt will be stored in the session to be used to present a sign-up page to the user (see <a class="xref" href="signin.html#signin_signup" title="5.3&nbsp;Signing up after a failed sign in">Section&nbsp;5.3, &#8220;Signing up after a failed sign in&#8221;</a>).
+				By configuring ConnectionFactoryLocator and UsersConnectionRepository as scoped proxies, it enables the proxies to be carried along with the sign in attempt in the session rather than the actual objects themselves.
+			</p>
+			<p>	
+				The <code class="interfacename">SignInAdapter</code> is exclusively used for provider sign in and so a <code class="interfacename">SignInAdapter</code> bean will need to be added to the configuration.
+				But first, you'll need to write an implementation of the <code class="interfacename">SignInAdapter</code> interface.
+			</p>
+			<p>
+				The <code class="interfacename">SignInAdapter</code> interface is defined as follows:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> SignInAdapter {
+    String signIn(String userId, Connection&lt;?&gt; connection, NativeWebRequest request);
+}
+			</pre>
+			<p>
+				The <code class="methodname">signIn()</code> method takes the local application user's user ID normalized as a <code class="classname">String</code>.
+				No other credentials are necessary here because by the time this method is called the user will have signed into the provider and their connection with that provider has been used to prove the user's identity.
+				Implementations of this interface should use this user ID to authenticate the user to the application. 
+			</p>
+			<p>
+				Different applications will implement security differently, so each application must implement <code class="interfacename">SignInAdapter</code> in a way that fits its unique security scheme.
+				For example, suppose that an application's security is based on Spring Security and simply uses a user's account ID as their principal. 
+				In that case, a simple implementation of <code class="interfacename">SignInAdapter</code> might look like this:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Service</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SpringSecuritySignInAdapter <span class="hl-keyword">implements</span> SignInAdapter {
+    <span class="hl-keyword">public</span> String signIn(String localUserId, Connection&lt;?&gt; connection, NativeWebRequest request) {
+        SecurityContextHolder.getContext().setAuthentication(
+            <span class="hl-keyword">new</span> UsernamePasswordAuthenticationToken(localUserId, null, null));
+        <span class="hl-keyword">return</span> null;
+    }
+}
+			</pre>
+		</div>
+		
+		<div class="section" title="5.2.2&nbsp;Adding a provider sign in button"><div class="titlepage"><div><div><h3 class="title"><a name="d4e883"></a>5.2.2&nbsp;Adding a provider sign in button</h3></div></div></div>
+			
+			<p>
+				With <code class="classname">ProviderSignInController</code> and a <code class="interfacename">SignInAdapter</code> configured, the backend support for provider sign in is in place.
+	      		The last thing to do is to add a sign in button to your application that will kick off the authentication flow with <code class="classname">ProviderSignInController</code>.
+	   		</p>
+	   		<p>
+	      		For example, the following HTML snippet adds a "Signin with Twitter" button to a page:
+	  		</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">id</span>=<span class="hl-value">"tw_signin"</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/s</span>ignin/twitter"/&gt;" method="POST"&gt;
+  <span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/r</span>esources/social/twitter/sign-in-with-twitter-d.png"/&gt;" /&gt;
+  <span class="hl-tag">&lt;/button&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+			</pre>
+			<p>
+				Notice that the path used in the form's <code class="code">action</code> attribute maps to the first step in <code class="classname">ProviderSignInController</code>'s flow.
+				In this case, the provider is identified as "twitter".
+			</p>
+			<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top">
+				<p>
+					Some providers offer client-side sign in widgets, such as Twitter @Anywhere's "Connect with Twitter" button and Facebook's <code class="code">&lt;fb:login-button&gt;</code>.
+					Although these widgets offer a sign in experience similar to that of <code class="code">ProviderSignInController</code>, they cannot be used to drive <code class="code">ProviderSignInController</code>'s sign in flow.
+					The <code class="code">ProviderSignInController</code> sign in flow should be initiated by submitting a POST request as described above.
+				</p>
+			</td></tr></table></div>
+			<p>
+				Clicking this button will trigger a POST request to "/signin/twitter", kicking off the Twitter sign in flow. 
+				If the user has not yet signed into Twitter, the user will be presented with the following page from Twitter:
+			</p>
+			<div class="mediaobject" align="center"><img src="images/sign-in-with-twitter.png" align="middle"></div>
+			<p>
+				After signing in, the flow will redirect back to the application to complete the sign in process.
+			</p>
+    	</div>
+	</div>
+
+	<div class="section" title="5.3&nbsp;Signing up after a failed sign in"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="signin_signup"></a>5.3&nbsp;Signing up after a failed sign in</h2></div></div></div>
+		
+		<p>
+			If <code class="classname">ProviderSignInController</code> can't find a local user associated with a provider user attempting to sign in, there may be an opportunity to have the user sign up with the application.
+			Leveraging the information about the user received from the provider, the user may be presented with a pre-filled sign up form to explicitly sign up with the application.
+			It's also possible to use the user's provider data to implicitly create a new local application user without presenting a sign up form. 
+		</p>
+		<div class="section" title="5.3.1&nbsp;Signing up with a sign up form"><div class="titlepage"><div><div><h3 class="title"><a name="signin_signup_explicit"></a>5.3.1&nbsp;Signing up with a sign up form</h3></div></div></div>
+								
+			<p>
+				By default, the sign up URL is "/signup", relative to the application root. 
+				You can override that default by setting the <code class="code">signUpUrl</code> property on the controller. 
+				For example, the following configuration of <code class="classname">ProviderSignInController</code> sets the sign up URL to "/register": 
+			</p>
+			
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ProviderSignInController providerSignInController() {
+    ProviderSignInController controller = <span class="hl-keyword">new</span> ProviderSignInController(connectionFactoryLocator(), 
+        usersConnectionRepository(), <span class="hl-keyword">new</span> SimpleSignInAdapter());
+    controller.setSignUpUrl(<span class="hl-string">"/register"</span>);
+    <span class="hl-keyword">return</span> controller;
+}
+			</pre>
+			<p>
+				Or to set the sign up URL using XML configuration:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ProviderSignInController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"signUpUrl"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"/register"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+			</pre>
+			<p>
+				Before redirecting to the sign up page, <code class="classname">ProviderSignInController</code> collects some information about the authentication attempt.
+				This information can be used to prepopulate the sign up form and then, after successful sign up, to establish a connection between the new account and the provider account.			
+			</p>
+			<p>
+				To prepopulate the sign up form, you can fetch the user profile data from a connection retrieved from <code class="methodname">ProviderSignInUtils.getConnection()</code>.
+				For example, consider this Spring MVC controller method that setups up the sign up form with a <code class="classname">SignupForm</code> to bind to the sign up form:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@RequestMapping(value="/signup", method=RequestMethod.GET)</span></i>
+<span class="hl-keyword">public</span> SignupForm signupForm(WebRequest request) {
+    Connection&lt;?&gt; connection = ProviderSignInUtils.getConnection(request);
+    <span class="hl-keyword">if</span> (connection != null) {
+        <span class="hl-keyword">return</span> SignupForm.fromProviderUser(connection.fetchUserProfile());
+    } <span class="hl-keyword">else</span> {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> SignupForm();
+    }
+}
+			</pre>
+			<p>
+				If <code class="methodname">ProviderSignInUtils.getConnection()</code> returns a connection, that means there was a failed provider sign in attempt that can be completed if the user registers to the application.
+				In that case, a <code class="classname">SignupForm</code> object is created from the user profile data obtained from the connection's <code class="methodname">fetchUserProfile()</code> method.
+				Within <code class="methodname">fromProviderUser()</code>, the <code class="classname">SignupForm</code> properties may be set like this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">static</span> SignupForm fromProviderUser(UserProfile providerUser) {
+    SignupForm form = <span class="hl-keyword">new</span> SignupForm();
+    form.setFirstName(providerUser.getFirstName());
+    form.setLastName(providerUser.getLastName());
+    form.setUsername(providerUser.getUsername());
+    form.setEmail(providerUser.getEmail());
+    <span class="hl-keyword">return</span> form;
+}
+			</pre>
+			<p>
+				Here, the <code class="classname">SignupForm</code> is created with the user's first name, last name, username, and email from the <code class="classname">UserProfile</code>.
+				In addition, <code class="classname">UserProfile</code> also has a <code class="methodname">getName()</code> method which will return the user's full name as given by the provider.
+			</p>
+			<p>
+				The availability of <code class="classname">UserProfile</code>'s properties will depend on the provider.
+				Twitter, for example, does not provide a user's email address, so the <code class="methodname">getEmail()</code> method will always return null after a sign in attempt with Twitter.
+			</p>
+			<p>
+				After the user has successfully signed up in your application a connection can be created between the new local user account and their provider account. 
+				To complete the connection call <code class="methodname">ProviderSignInUtils.handlePostSignUp()</code>.
+				For example, the following method handles the sign up form submission, creates an account and then calls <code class="methodname">ProviderSignInUtils.handlePostSignUp()</code> to complete the connection:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@RequestMapping(value="/signup", method=RequestMethod.POST)</span></i>
+<span class="hl-keyword">public</span> String signup(<i><span class="hl-annotation" style="color: gray">@Valid</span></i> SignupForm form, BindingResult formBinding, WebRequest request) {
+    <span class="hl-keyword">if</span> (formBinding.hasErrors()) {
+        <span class="hl-keyword">return</span> null;
+    }
+    Account account = createAccount(form, formBinding);
+    <span class="hl-keyword">if</span> (account != null) {
+        SignInUtils.signin(account.getUsername());
+        ProviderSignInUtils.handlePostSignUp(account.getUsername(), request);
+        <span class="hl-keyword">return</span> <span class="hl-string">"redirect:/"</span>;
+    }
+    <span class="hl-keyword">return</span> null;
+}
+			</pre>
+		</div>
+		<div class="section" title="5.3.2&nbsp;Implicit sign up"><div class="titlepage"><div><div><h3 class="title"><a name="signin_signup_implicit"></a>5.3.2&nbsp;Implicit sign up</h3></div></div></div>
+				
+			<p>
+				To enable implicit sign up, you must create an implementation of the <code class="interfacename">ConnectionSignUp</code> interface and inject an instance of that <code class="interfacename">ConnectionSignUp</code> to the connection repository.
+				The <code class="interfacename">ConnectionSignUp</code> interface is simple, with only a single method to implement:
+			</p>				
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectionSignUp {
+    String execute(Connection&lt;?&gt; connection);
+}
+			</pre>
+			<p>
+				The <code class="methodname">execute()</code> method is given a <code class="interfacename">Connection</code> that it can use to retrieve information about the user.
+				It can then use that information to create a new local application user and return the new local user ID.
+				For example, the following implementation fetches the user's provider profile and uses it to create a new account: 
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> AccountConnectionSignUp <span class="hl-keyword">implements</span> ConnectionSignUp {
+
+    <span class="hl-keyword">private</span> <span class="hl-keyword">final</span> AccountRepository accountRepository;
+
+    <span class="hl-keyword">public</span> AccountConnectionSignUp(AccountRepository accountRepository) {
+        <span class="hl-keyword">this</span>.accountRepository = accountRepository;
+    }
+
+    <span class="hl-keyword">public</span> String execute(Connection&lt;?&gt; connection) {
+        UserProfile profile = connection.fetchUserProfile();
+        Account account = <span class="hl-keyword">new</span> Account(profile.getUsername(), profile.getFirstName(), profile.getLastName());
+        accountRepository.createAccount(account);
+        <span class="hl-keyword">return</span> account.getUsername();
+    }
+	
+}
+			</pre>
+			<p>
+				If there is any problem in creating the new user implicitly (for example, if the implicitly chosen username is already taken) <code class="methodname">execute()</code> may return null to indicate that the user could not be created implicitly.
+				This will ultimately result in <code class="classname">ProviderSignInController</code> redirecting the user to the signup page.
+			</p>
+			<p>
+				Once you've written a <code class="interfacename">ConnectionSignUp</code> for your application, you'll need to inject it into the <code class="interfacename">UsersConnectionRepository</code>.
+				In Java-based configuration: 
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<i><span class="hl-annotation" style="color: gray">@Scope(value="singleton", proxyMode=ScopedProxyMode.INTERFACES)</span></i> 
+<span class="hl-keyword">public</span> UsersConnectionRepository usersConnectionRepository(AccountRepository accountRepository) {
+    JdbcUsersConnectionRepository repository = <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(
+        dataSource, connectionFactoryLocator(), Encryptors.noOpText());
+    repository.setConnectionSignUp(<span class="hl-keyword">new</span> AccountConnectionSignUp(accountRepository));
+    <span class="hl-keyword">return</span> repository;
+}
+			</pre>	
+		</div>
+	</div>	
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="connecting.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;</td></tr><tr><td width="40%" align="left" valign="top">4.&nbsp;Connecting to Service Providers&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;</td></tr></table></div></body></html>

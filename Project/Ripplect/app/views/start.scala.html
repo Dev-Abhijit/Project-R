@@ -1,0 +1,100 @@
+@(recent_threads: List[MyData], userName: String, books: List[Book], myThreadForm: Form[Post_thread], library: List[List[Book]])
+
+@import helper._
+
+
+@main("Home Page"){
+<div class="home-link">
+<a href="@routes.Application.home(userName)">My Home</a>
+</div>
+<div class="myread">
+<h3 id="myread-h3">My Recent Reads</h3>
+    <ul class="myread-ul">
+        @for(recent_thread <- recent_threads){
+
+            <li class="read">
+                @recent_thread.thread.header
+            </li>
+        }
+    </ul>
+<h3>My Collaborations</h3>
+<h3 id="mylib-h3">My Libraries</h3>
+<div class="sidebar-lib-home">
+@for(books <- library){
+<div class="sidebar-library">
+<div class="sidebar-shelf">
+<ul class="mylib-ul">
+@books.zipWithIndex.map{
+ case (book, i) => {
+<li class="book@i">
+<div  class="book">
+@if(book.thread.header.length() > 25){
+
+@book.thread.header.substring(0,25)..
+} else {
+@book.thread.header
+}
+</div>
+</li>
+}
+}
+</ul>
+<div class="shelf-stand">&nbsp;</div>
+
+
+
+</div>
+</div>
+
+}
+<div class="lib-home-link"><a href=@routes.Application.libHome(userName)>Library Home >></a></div>
+</div>
+</div>
+
+}{
+	<div class="start-home">
+
+		<div class="drop-shadow lifted">
+		<div class="start-text-form">
+    	@helper.form(action = routes.Start.submit(userName, "myThread")) {
+
+        <fieldset>
+            <legend>Start A Thread</legend>
+
+            @inputText(
+                myThreadForm("header"),
+                '_label -> "Header",
+                '_help -> "Please choose a header for your thread.",
+                '_error -> myThreadForm.globalError,
+                'size -> 100
+            )
+
+            @textarea(
+                myThreadForm("content"), '_label -> "Content",
+                '_help -> "Write the main content.", 'cols -> 85,
+                'rows -> 25
+
+            )
+
+           @select(
+                myThreadForm("interest"),
+                options = options(Interests.list),
+                '_default -> "Choose the Interest Category",
+                '_label -> "Interest",
+                '_help -> ""
+            )
+
+        </fieldset>
+
+        <input type="submit" class="" value="Submit">
+        }
+		</div>
+		</div>
+    </div>
+}{
+	<div class="right-content">
+	<a href="@routes.Start.index(userName)" class="button-side">Start Thread</a>
+	<a href="@routes.Start.startNewProject(userName)" class="button-side">Start Collaboration</a>
+	<a href="" class="button-y">Yelp!</a>
+	</div>
+}

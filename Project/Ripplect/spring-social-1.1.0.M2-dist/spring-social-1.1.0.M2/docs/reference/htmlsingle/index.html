@@ -1,0 +1,2214 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Spring Social Reference Documentation</title><link rel="stylesheet" href="css/manual-singlepage.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" title="Spring Social Reference Documentation"><div class="titlepage"><div><div><h1 class="title"><a name="spring-framework-reference"></a>Spring Social Reference Documentation</h1></div><div><div class="authorgroup"><h2>Authors</h2>
+      <span class="author"><span class="firstname">Craig</span> <span class="surname">Walls</span></span>
+      , <span class="author"><span class="firstname">Keith</span> <span class="surname">Donald</span></span>
+    </div></div><div><p class="releaseinfo">1.1.0.M2</p></div><div><p class="copyright">Copyright &copy; 2011-2013 </p></div><div><div class="legalnotice" title="Legal Notice"><a name="d4e17"></a>
+      <p>Copies of this document may be made for your own use and for
+      distribution to others, provided that you do not charge any fee for such
+      copies and further provided that each copy contains this Copyright
+      Notice, whether distributed in print or electronically.</p>
+    </div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#overview">1. Spring Social Overview</a></span></dt><dd><dl><dt><span class="section"><a href="#overview-introduction">1.1. Introduction</a></span></dt><dt><span class="section"><a href="#overview-social">1.2. Socializing applications</a></span></dt><dt><span class="section"><a href="#overview-howtoget">1.3. How to get</a></span></dt><dd><dl><dt><span class="section"><a href="#overview-client-modules">1.3.1. Client modules</a></span></dt></dl></dd><dt><span class="section"><a href="#overview-dependencies">1.4. Dependencies</a></span></dt><dd><dl><dt><span class="section"><a href="#overview-dependencies-java">1.4.1. Java</a></span></dt><dt><span class="section"><a href="#overview-dependencies-javaee">1.4.2. Java Servlet API</a></span></dt><dt><span class="section"><a href="#overview-dependencies-spring">1.4.3. Spring Framework</a></span></dt><dt><span class="section"><a href="#overview-dependencies-springsecurity">1.4.4. Spring Security Crypto</a></span></dt><dt><span class="section"><a href="#overview-dependencies-httpcomponents">1.4.5. Apache HttpComponents</a></span></dt><dt><span class="section"><a href="#overview-dependencies-jackson">1.4.6. Jackson JSON Processor</a></span></dt></dl></dd><dt><span class="section"><a href="#overview-samples">1.5. Sample Code</a></span></dt></dl></dd><dt><span class="chapter"><a href="#serviceprovider">2. Service Provider 'Connect' Framework</a></span></dt><dd><dl><dt><span class="section"><a href="#service-providers-base-api">2.1. Core API</a></span></dt><dt><span class="section"><a href="#service-providers-establishing-connections">2.2. Establishing connections</a></span></dt><dd><dl><dt><span class="section"><a href="#service-providers-oauth2">2.2.1. OAuth2 service providers</a></span></dt><dt><span class="section"><a href="#service-providers-oauth1">2.2.2. OAuth1 service providers</a></span></dt><dt><span class="section"><a href="#service-providers-establishing-connections-connection-factory-registry">2.2.3. Registering ConnectionFactory instances</a></span></dt></dl></dd><dt><span class="section"><a href="#service-providers-persisting-connections">2.3. Persisting connections</a></span></dt><dd><dl><dt><span class="section"><a href="#service-providers-persisting-connections-jdbc">2.3.1. JDBC-based persistence</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#implementing">3. Adding Support for a New Service Provider</a></span></dt><dd><dl><dt><span class="section"><a href="#service-providers-implementing">3.1. Process overview</a></span></dt><dt><span class="section"><a href="#service-providers-implementing-project">3.2. Creating a source project for the provider client code</a></span></dt><dd><dl><dt><span class="section"><a href="#service-providers-implementing-project-structure">3.2.1. Code structure guidelines</a></span></dt></dl></dd><dt><span class="section"><a href="#service-providers-implementing-api">3.3. Developing a Java binding to the provider's API</a></span></dt><dd><dl><dt><span class="section"><a href="#service-provider-implementing-api-new-designing">3.3.1. Designing a new Java API binding</a></span></dt><dt><span class="section"><a href="#service-provider-implementing-api-new-implementing">3.3.2. Implementing a new Java API binding</a></span></dt><dt><span class="section"><a href="#service-provider-implementing-api-new-testing">3.3.3. Testing a new Java API binding</a></span></dt><dt><span class="section"><a href="#service-provider-implementing-api-existing-integrating">3.3.4. Integrating an existing Java API binding</a></span></dt></dl></dd><dt><span class="section"><a href="#service-providers-implementing-serviceprovider">3.4. Creating a ServiceProvider model</a></span></dt><dd><dl><dt><span class="section"><a href="#service-providers-implementing-serviceprovider-oauth2">3.4.1. OAuth2</a></span></dt><dt><span class="section"><a href="#service-providers-implementing-serviceprovider-oauth1">3.4.2. OAuth1</a></span></dt></dl></dd><dt><span class="section"><a href="#service-providers-implementing-serviceapiadapter">3.5. Creating an ApiAdapter</a></span></dt><dt><span class="section"><a href="#service-providers-implementing-serviceproviderconnectionfactory">3.6. Creating a ConnectionFactory</a></span></dt><dd><dl><dt><span class="section"><a href="#service-providers-implementing-serviceproviderconnectionfactory-oauth2">3.6.1. OAuth2</a></span></dt><dt><span class="section"><a href="#service-providers-implementing-serviceproviderconnectionfactory-oauth1">3.6.2. OAuth1</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#connecting">4. Connecting to Service Providers</a></span></dt><dd><dl><dt><span class="section"><a href="#section_connecting_introduction">4.1. Introduction</a></span></dt><dt><span class="section"><a href="#section_connecting_service_providers">4.2. Configuring ConnectController</a></span></dt><dd><dl><dt><span class="section"><a href="#d4e573">4.2.1. Configuring connection support in XML</a></span></dt></dl></dd><dt><span class="section"><a href="#connect-controller">4.3. Creating connections with <code class="classname">ConnectController</code></a></span></dt><dd><dl><dt><span class="section"><a href="#connect-controller-flow-1">4.3.1. Displaying a connection page</a></span></dt><dt><span class="section"><a href="#connect-controller-flow-2">4.3.2. Initiating the connection flow</a></span></dt><dd><dl><dt><span class="section"><a href="#connect-controller-flow-3-scope">Authorization scope</a></span></dt></dl></dd><dt><span class="section"><a href="#connect-controller-flow-3">4.3.3. Responding to the authorization callback</a></span></dt><dt><span class="section"><a href="#connect-controller-flow-disconnect">4.3.4. Disconnecting</a></span></dt></dl></dd><dt><span class="section"><a href="#connect-interceptors">4.4. Connection interceptors</a></span></dt></dl></dd><dt><span class="chapter"><a href="#signin">5. Signing in with Service Provider Accounts</a></span></dt><dd><dl><dt><span class="section"><a href="#signin_introduction">5.1. Introduction</a></span></dt><dt><span class="section"><a href="#signin_using">5.2. Enabling provider sign in</a></span></dt><dd><dl><dt><span class="section"><a href="#d4e846">5.2.1. ProviderSignInController's dependencies</a></span></dt><dt><span class="section"><a href="#d4e883">5.2.2. Adding a provider sign in button</a></span></dt></dl></dd><dt><span class="section"><a href="#signin_signup">5.3. Signing up after a failed sign in</a></span></dt><dd><dl><dt><span class="section"><a href="#signin_signup_explicit">5.3.1. Signing up with a sign up form</a></span></dt><dt><span class="section"><a href="#signin_signup_implicit">5.3.2. Implicit sign up</a></span></dt></dl></dd></dl></dd></dl></div>
+        
+  
+
+  
+  
+    <div class="chapter" title="1.&nbsp;Spring Social Overview"><div class="titlepage"><div><div><h2 class="title"><a name="overview"></a>1.&nbsp;Spring Social Overview</h2></div></div></div>
+
+	
+	
+	<div class="section" title="1.1&nbsp;Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="overview-introduction"></a>1.1&nbsp;Introduction</h2></div></div></div>
+		
+		<p>The Spring Social project enables your applications to establish Connections with Software-as-a-Service (SaaS) Providers such as Facebook and Twitter to invoke APIs on behalf of Users.</p>
+	</div>
+	<div class="section" title="1.2&nbsp;Socializing applications"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="overview-social"></a>1.2&nbsp;Socializing applications</h2></div></div></div>
+		
+		<p>
+			The phrase "social networking" often refers to efforts aimed at bringing people together.
+			In the software world, those efforts take the form of online social networks such as Facebook, Twitter, and LinkedIn.
+			Over half a billion of this world's internet users have flocked to these services to keep frequent contact with family, friends, and colleagues.
+		</p>
+		<p>
+			Under the surface, however, these services are just software applications that gather, store, and process information.
+			Just like so many applications written before, these social networks have users who sign in and perform some activity offered by the service.
+		</p>
+		<p>
+			What makes these applications a little different than traditional applications is that the data that they collect represent some facet of their users' lives.
+			What's more, these applications are more than willing to share that data with other applications, as long as the user gives permission to do so.
+			This means that although these social networks are great at bringing people together, as software services they also excel at bringing applications together.
+		</p>
+		<p>
+			To illustrate, imagine that Paul is a member of an online movie club.
+			A function of the movie club application is to recommend movies for its members to watch and to let its members maintain a list of movies that they have seen and those that they plan to see.
+			When Paul sees a movie, he signs into the movie club site, checks the movie off of his viewing list, and indicates if he liked the movie or not.
+			Based on his responses, the movie club application can tailor future recommendations for Paul to see.
+		</p>
+		<p>
+			On its own, the movie club provides great value to Paul, as it helps him choose movies to watch.
+			But Paul is also a Facebook user. And many of Paul's Facebook friends also enjoy a good movie now and then.
+			If Paul were able to connect his movie club account with his Facebook profile, the movie club application could offer him a richer experience.
+			Perhaps when he sees a movie, the application could post a message on his Facebook wall indicating so.
+			Or when offering suggestions, the movie club could factor in the movies that his Facebook friends liked.
+		</p>
+		<p>
+			Social integration is a three-way conversation between a service provider, a service consumer, and a user who holds an account on both the provider and consumer.
+			All interactions between the consumer and the service provider are scoped to the context of the user's profile on the service provider.
+		</p>
+		<p>
+			In the narrative above, Facebook is the service provider, the movie club application is the service consumer, and Paul is the user of both.
+			The movie club application may interact with Facebook on behalf of Paul, accessing whatever Facebook data and functionality that Paul permits, including retrieving Paul's friends and posting messages to his wall.
+		</p>
+		<p>
+			From the user's perspective, both applications provide some valuable functionality.
+			But by connecting the user's account on the consumer application with his account on the provider application, the user brings together two applications that can now offer the user more value than they could individually.
+		</p>
+		<p>
+			With Spring Social, your application can play the part of the service consumer, interacting with a service provider on behalf of its users. The key features of Spring Social are:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>A "Connect Framework" that handles the core authorization and connection flow with service providers.</p></li><li class="listitem"><p>A "Connect Controller" that handles the OAuth exchange between a service provider, consumer, and user in a web application environment.</p></li><li class="listitem"><p>A "Signin Controller" that allows users to authenticate with your application by signing in with their Provider accounts, such as their Twitter or Facebook accounts.</p></li></ul></div>
+		<p>
+			In addition, there are a handful of provider-specific modules that extend Spring Social to enable integration with popular SaaS providers, including Facebook and Twitter.
+		</p>
+	</div>
+  
+	<div class="section" title="1.3&nbsp;How to get"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="overview-howtoget"></a>1.3&nbsp;How to get</h2></div></div></div>
+		
+		<p>
+			The core Spring Social project consists of the modules described in <a class="xref" href="#table-spring-social-modules" title="Table&nbsp;1.1.&nbsp;Spring Social Modules">Table&nbsp;1.1, &#8220;Spring Social Modules&#8221;</a>.
+		</p>
+      <div class="table"><a name="table-spring-social-modules"></a><p class="title"><b>Table&nbsp;1.1.&nbsp;Spring Social Modules</b></p><div class="table-contents">
+        
+        <table summary="Spring Social Modules" style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; "><colgroup><col align="left"><col></colgroup><thead><tr><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Name</th><th style="border-bottom: 0.5pt solid ; " align="center">Description</th></tr></thead><tbody><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">spring-social-core</td><td style="border-bottom: 0.5pt solid ; ">Spring Social's Connect Framework and OAuth client support.</td></tr><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">spring-social-web</td><td style="border-bottom: 0.5pt solid ; ">Spring Social's <code class="classname">ConnectController</code> which uses the Connect Framework to manage connections in a web application environment.</td></tr><tr><td style="border-right: 0.5pt solid ; " align="left">spring-social-test</td><td style="">Support for testing Connect implementations and API bindings.</td></tr></tbody></table>
+      </div></div><br class="table-break">
+		<p>
+			Which of these modules your application needs will largely depend on what facets of Spring Social you intend to use. At very minimum, you'll need the core module in your application's classpath:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;dependency&gt;</span>
+    <span class="hl-tag">&lt;groupId&gt;</span>org.springframework.social<span class="hl-tag">&lt;/groupId&gt;</span>
+    <span class="hl-tag">&lt;artifactId&gt;</span>spring-social-core<span class="hl-tag">&lt;/artifactId&gt;</span>
+    <span class="hl-tag">&lt;version&gt;</span>${spring-social.version}<span class="hl-tag">&lt;/version&gt;</span>
+<span class="hl-tag">&lt;/dependency&gt;</span>
+		</pre>
+		<p>
+			To let Spring Social handle the back-and-forth authorization handshake between your web application and a service provider, you'll need the web module:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;dependency&gt;</span>
+    <span class="hl-tag">&lt;groupId&gt;</span>org.springframework.social<span class="hl-tag">&lt;/groupId&gt;</span>
+    <span class="hl-tag">&lt;artifactId&gt;</span>spring-social-web<span class="hl-tag">&lt;/artifactId&gt;</span>
+    <span class="hl-tag">&lt;version&gt;</span>${spring-social.version}<span class="hl-tag">&lt;/version&gt;</span>
+<span class="hl-tag">&lt;/dependency&gt;</span>
+		</pre>
+		<p>
+			If you are developing against a milestone or release candidate version, such as 1.0.0.M1 or 1.0.0.RC1, you will need to add the following repository in order to resolve the artifact:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;repository&gt;</span>
+    <span class="hl-tag">&lt;id&gt;</span>org.springframework.maven.milestone<span class="hl-tag">&lt;/id&gt;</span>
+    <span class="hl-tag">&lt;name&gt;</span>Spring Maven Milestone Repository<span class="hl-tag">&lt;/name&gt;</span>
+		<span class="hl-tag">&lt;url&gt;</span>http://repo.springsource.org/libs-milestone-local<span class="hl-tag">&lt;/url&gt;</span>
+<span class="hl-tag">&lt;/repository&gt;</span>
+		</pre>		
+		<p>
+			If you are testing out the latest nightly build version (e.g. 1.0.0.BUILD-SNAPSHOT), you will need to add the following repository:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;repository&gt;</span>
+    <span class="hl-tag">&lt;id&gt;</span>org.springframework.maven.snapshot<span class="hl-tag">&lt;/id&gt;</span>
+    <span class="hl-tag">&lt;name&gt;</span>Spring Maven Snapshot Repository<span class="hl-tag">&lt;/name&gt;</span>
+		<span class="hl-tag">&lt;url&gt;</span>http://repo.springsource.org/libs-snapshot-local<span class="hl-tag">&lt;/url&gt;</span>
+<span class="hl-tag">&lt;/repository&gt;</span>
+		</pre>
+		<div class="section" title="1.3.1&nbsp;Client modules"><div class="titlepage"><div><div><h3 class="title"><a name="overview-client-modules"></a>1.3.1&nbsp;Client modules</h3></div></div></div>
+			
+			<p>
+				In addition to modules that make up the core Spring Social project, there are a number of provider-specific client modules that are released separately that provide connectivity and API bindings to popular SaaS providers.
+				These client modules are listed in <a class="xref" href="#table-spring-social-client-modules" title="Table&nbsp;1.2.&nbsp;Spring Social Client Modules">Table&nbsp;1.2, &#8220;Spring Social Client Modules&#8221;</a>.
+			</p>
+			<div class="table"><a name="table-spring-social-client-modules"></a><p class="title"><b>Table&nbsp;1.2.&nbsp;Spring Social Client Modules</b></p><div class="table-contents">
+				
+				<table summary="Spring Social Client Modules" style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; "><colgroup><col align="left"><col><col></colgroup><thead><tr><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Name</th><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Maven group ID</th><th style="border-bottom: 0.5pt solid ; " align="center">Maven artifact ID</th></tr></thead><tbody><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left"><a class="ulink" href="http://static.springsource.org/spring-social-facebook/docs/1.0.x/reference/html/" target="_top">Spring Social Facebook</a></td><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; ">org.springframework.social</td><td style="border-bottom: 0.5pt solid ; ">spring-social-facebook</td></tr><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left"><a class="ulink" href="http://static.springsource.org/spring-social-twitter/docs/1.0.x/reference/html/" target="_top">Spring Social Twitter</a></td><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; ">org.springframework.social</td><td style="border-bottom: 0.5pt solid ; ">spring-social-twitter</td></tr><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left"><a class="ulink" href="http://static.springsource.org/spring-social-linkedin/docs/1.0.x/reference/html/" target="_top">Spring Social LinkedIn</a></td><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; ">org.springframework.social</td><td style="border-bottom: 0.5pt solid ; ">spring-social-linkedin</td></tr><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left"><a class="ulink" href="http://static.springsource.org/spring-social-tripit/docs/1.0.x/reference/html/" target="_top">Spring Social TripIt</a></td><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; ">org.springframework.social</td><td style="border-bottom: 0.5pt solid ; ">spring-social-tripit</td></tr><tr><td style="border-right: 0.5pt solid ; " align="left"><a class="ulink" href="http://static.springsource.org/spring-social-github/docs/1.0.x/reference/html/" target="_top">Spring Social GitHub</a></td><td style="border-right: 0.5pt solid ; ">org.springframework.social</td><td style="">spring-social-github</td></tr></tbody></table>
+			</div></div><br class="table-break">
+			<p>
+				All of these modules are optional, depending on the connectivity needs of your application.
+				For instance, if your application will connect with Facebook, you'll want to add the Facebook module to your project:
+			</p>
+	    	<pre class="programlisting">
+<span class="hl-tag">&lt;dependency&gt;</span>
+    <span class="hl-tag">&lt;groupId&gt;</span>org.springframework.social<span class="hl-tag">&lt;/groupId&gt;</span>
+    <span class="hl-tag">&lt;artifactId&gt;</span>spring-social-facebook<span class="hl-tag">&lt;/artifactId&gt;</span>
+    <span class="hl-tag">&lt;version&gt;</span>${spring-social-facebook.version}<span class="hl-tag">&lt;/version&gt;</span>
+<span class="hl-tag">&lt;/dependency&gt;</span>
+			</pre>	
+	 		<p>
+	 			Note that each of the client modules will progress and release on a different schedule than Spring Social.
+	 			Consequently, the version numbers for any given client module may not align with Spring Social or any other client module.
+	 		</p>
+	 		<p>
+	 			Refer to each client module's reference documentation for details on connectivity and the API binding.
+	 		</p>
+		</div>				
+	</div>
+	
+	<div class="section" title="1.4&nbsp;Dependencies"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="overview-dependencies"></a>1.4&nbsp;Dependencies</h2></div></div></div>
+		
+		<p>
+			Spring Social depends on a few things to run. Most dependencies are optional and an effort has been made to keep the required dependencies to a minimum.
+			The project dependencies are described in this section.
+		</p>
+		<div class="section" title="1.4.1&nbsp;Java"><div class="titlepage"><div><div><h3 class="title"><a name="overview-dependencies-java"></a>1.4.1&nbsp;Java</h3></div></div></div>
+			
+			<p>
+				Spring Social requires Java 1.5 or greater.
+			</p>
+		</div>
+		<div class="section" title="1.4.2&nbsp;Java Servlet API"><div class="titlepage"><div><div><h3 class="title"><a name="overview-dependencies-javaee"></a>1.4.2&nbsp;Java Servlet API</h3></div></div></div>
+			
+			<p>
+				The Spring Social web support requires Java Servlet 2.5 or greater (Tomcat 6+).
+			</p>
+		</div>
+		<div class="section" title="1.4.3&nbsp;Spring Framework"><div class="titlepage"><div><div><h3 class="title"><a name="overview-dependencies-spring"></a>1.4.3&nbsp;Spring Framework</h3></div></div></div>
+			
+			<p>
+				Spring Social depends on RestTemplate provided by the core <a class="ulink" href="http://www.springsource.org/documentation" target="_top">Spring Framework</a> in the spring-web module.
+				It requires Spring Framework version 3.0.5 or above.
+				Spring Framework 3.1 is recommended to take advantage of several RestTemplate improvements.
+			</p>
+			<p>
+				If you are using Spring Social with Spring Framework 3.0.x (3.0.5 or &gt;), make sure you explicitly add the spring-web dependency to your build:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;dependency&gt;</span>
+    <span class="hl-tag">&lt;groupId&gt;</span>org.springframework<span class="hl-tag">&lt;/groupId&gt;</span>
+    <span class="hl-tag">&lt;artifactId&gt;</span>spring-web<span class="hl-tag">&lt;/artifactId&gt;</span>
+    <span class="hl-tag">&lt;version&gt;</span>3.0.7.RELEASE<span class="hl-tag">&lt;/version&gt;</span>
+<span class="hl-tag">&lt;/dependency&gt;</span>
+			</pre>
+			<p>
+				Maven's dependency management favors "nearest" dependencies, so your project's definition of the spring-web dependency will override Spring Social's transitive dependency on the recommended 3.1 version.
+			</p>
+			<p>
+				Gradle, on the other hand, favors the newest dependency.
+				If you're using Gradle to build your project, you'll need to also set the dependency's <code class="code">force</code> property to <code class="code">true</code> to force Gradle to resolve your chosen version of Spring:
+			</p>
+			<pre class="programlisting">
+dependencies { 
+    compile (<span class="hl-string">"org.springframework:spring-web:3.0.6.RELEASE"</span>) { force=true }
+}
+			</pre>
+		</div>			
+		<div class="section" title="1.4.4&nbsp;Spring Security Crypto"><div class="titlepage"><div><div><h3 class="title"><a name="overview-dependencies-springsecurity"></a>1.4.4&nbsp;Spring Security Crypto</h3></div></div></div>
+			
+			<p>
+				If you're not already using Spring Security to secure your application, you'll need to add the standalone crypto module. 
+				This is required for OAuth1 request signing and encrypting credentials when persisting Connection data. 
+				If you're already using Spring Security, there is nothing for you to do because the crypto library comes included.
+			</p>
+		    <pre class="programlisting">
+<span class="hl-tag">&lt;dependency&gt;</span>
+    <span class="hl-tag">&lt;groupId&gt;</span>org.springframework.security<span class="hl-tag">&lt;/groupId&gt;</span>
+    <span class="hl-tag">&lt;artifactId&gt;</span>spring-security-crypto<span class="hl-tag">&lt;/artifactId&gt;</span>
+    <span class="hl-tag">&lt;version&gt;</span>3.1.0.RELEASE<span class="hl-tag">&lt;/version&gt;</span>
+<span class="hl-tag">&lt;/dependency&gt;</span>
+	  		</pre>
+  		</div>
+		<div class="section" title="1.4.5&nbsp;Apache HttpComponents"><div class="titlepage"><div><div><h3 class="title"><a name="overview-dependencies-httpcomponents"></a>1.4.5&nbsp;Apache HttpComponents</h3></div></div></div>
+			
+			<p>
+				Spring Social has an optional dependency on <a class="ulink" href="http://hc.apache.org/httpcomponents-client-ga" target="_top">Apache HttpComponents</a>.
+				If the HttpComponents HttpClient library is present, it will use it as the HTTP client (which is generally recommended).
+				Otherwise, it will fall back on standard J2SE facilities.
+			</p>
+		    <pre class="programlisting">
+<span class="hl-tag">&lt;dependency&gt;</span>
+    <span class="hl-tag">&lt;groupId&gt;</span>org.apache.httpcomponents<span class="hl-tag">&lt;/groupId&gt;</span>
+    <span class="hl-tag">&lt;artifactId&gt;</span>httpclient<span class="hl-tag">&lt;/artifactId&gt;</span>
+    <span class="hl-tag">&lt;version&gt;</span>4.1.2<span class="hl-tag">&lt;/version&gt;</span>
+<span class="hl-tag">&lt;/dependency&gt;</span>
+	  		</pre>
+			<p>
+				Although shown here to depend on version 4.1.2 of the HttpClient library, Spring Social can also work with 4.0.X versions of HttpClient.
+			</p>
+		</div>
+		<div class="section" title="1.4.6&nbsp;Jackson JSON Processor"><div class="titlepage"><div><div><h3 class="title"><a name="overview-dependencies-jackson"></a>1.4.6&nbsp;Jackson JSON Processor</h3></div></div></div>
+			
+			<p>
+				Spring Social's provider API bindings rely on the <a class="ulink" href="http://jackson.codehaus.org/" target="_top">Jackson JSON Processor</a> to map JSON responses to Java objects.
+				Each binding, such as Facebook or Twitter, transitively depends on Jackson 1.8.5, so there's nothing special to do to add Jackson to your project's Maven or Gradle build. 
+			</p>
+  		</div>
+	</div>				
+	<div class="section" title="1.5&nbsp;Sample Code"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="overview-samples"></a>1.5&nbsp;Sample Code</h2></div></div></div>
+		
+		<p>
+			We have created a few sample applications to illustrate the capabilities of Spring Social.
+			To obtain the <a class="ulink" href="https://github.com/SpringSource/spring-social-samples" target="_top">https://github.com/SpringSource/spring-social-samples</a> code, use the following git command:
+		</p>
+		<pre class="programlisting">
+git clone git://github.com/SpringSource/spring-social-samples.git
+		</pre>
+		
+		<p>
+			The Spring Social Samples project includes the following samples:
+		</p>
+		
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>spring-social-quickstart - Designed to get you up and running quickly.</p></li><li class="listitem"><p>spring-social-quickstart-30x - Designed to get you up and running quickly as well as using Spring Social with Spring 3.0.x.</p></li><li class="listitem"><p>spring-social-showcase - Illustrates most of Spring Social's features.</p></li><li class="listitem"><p>spring-social-movies - Shows how to extend Spring Social to implement a new ServiceProvider and API binding.</p></li><li class="listitem"><p>spring-social-twitter4j - Shows how to extend Spring Social and re-use an existing API binding.</p></li><li class="listitem"><p>spring-social-popup - Shows how to use Spring Social to drive a browser popup-based connection flow.</p></li><li class="listitem"><p>spring-social-canvas - Demonstrates how to use Spring Social within a Facebook Canvas application.</p></li></ul></div>
+	</div>
+</div>
+    <div class="chapter" title="2.&nbsp;Service Provider 'Connect' Framework"><div class="titlepage"><div><div><h2 class="title"><a name="serviceprovider"></a>2.&nbsp;Service Provider 'Connect' Framework</h2></div></div></div>
+	
+	<p>
+		The <code class="code">spring-social-core</code> module includes a <span class="emphasis"><em>Service Provider 'Connect' Framework</em></span> for managing connections to Software-as-a-Service (SaaS) providers such as Facebook and Twitter.
+		This framework allows your application to establish connections between local user accounts and accounts those users have with external service providers.  
+		Once a connection is established, it can be be used to obtain a strongly-typed Java binding to the ServiceProvider's API, giving your application the ability to invoke the API on behalf of a user.
+	</p>
+	<p>
+		To illustrate, consider Facebook as an example ServiceProvider.
+		Suppose your application, AcmeApp, allows users to share content with their Facebook friends.
+		To support this, a connection needs to be established between a user's AcmeApp account and her Facebook account.
+		Once established, a Facebook instance can be obtained and used to post content to the user's wall.
+		Spring Social's 'Connect' framework provides a clean API for managing service provider connections such as this.
+	</p>
+	<div class="section" title="2.1&nbsp;Core API"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-base-api"></a>2.1&nbsp;Core API</h2></div></div></div>
+		
+		<p>
+			The <code class="interfacename">Connection&lt;A&gt;</code> interface models a connection to an external service provider such as Facebook:
+			</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> Connection&lt;A&gt; {
+    
+    ConnectionKey getKey();
+    
+    String getDisplayName();
+
+    String getProfileUrl();
+
+    String getImageUrl();
+
+    <span class="hl-keyword">void</span> sync();
+
+    <span class="hl-keyword">boolean</span> test();
+
+    <span class="hl-keyword">boolean</span> hasExpired();
+
+    <span class="hl-keyword">void</span> refresh();
+
+    UserProfile fetchUserProfile();
+
+    <span class="hl-keyword">void</span> updateStatus(String message);
+
+    A getApi();
+
+    ConnectionData createData();
+
+}
+			</pre><p>
+		</p>
+		<p>
+			Each connection is uniquely identified by a composite key consisting of a providerId (e.g. 'facebook') and connected providerUserId (e.g. '1255689239', for Keith Donald's Facebook ID).
+			This key tells you what provider user the connection is connected to.
+		</p>
+		<p>
+			A connection has a number of meta-properties that can be used to render it on a screen, including a displayName, profileUrl, and imageUrl.
+			As an example, the following HTML template snippet could be used to generate a link to the connected user's profile on the provider's site:
+			</p><pre class="programlisting">
+<span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"${connection.imageUrl}"</span><span class="hl-tag"> /&gt;</span> <span class="hl-tag">&lt;a</span> <span class="hl-attribute">href</span>=<span class="hl-value">"${connection.profileUrl}"</span><span class="hl-tag">&gt;</span>${connection.displayName}<span class="hl-tag">&lt;/a&gt;</span>			
+			</pre><p>
+			The value of these properties may depend on the state of the provider user's profile.
+			In this case, sync() can be called to synchronize these values if the user's profile is updated.
+		</p>
+		<p>
+			A connection can be tested to determine if its authorization credentials are valid.
+			If invalid, the connection may have expired or been revoked by the provider.
+			If the connection has expired, a connection may be refreshed to renew its authorization credentials.
+		</p>
+		<p>
+			A connection provides several operations that allow the client application to invoke the ServiceProvider's API in a uniform way.
+			This includes the ability to fetch a model of the user's profile and update the user's status in the provider's system.
+		</p>
+		<p>
+			A connection's parameterized type &lt;A&gt; represents the Java binding to the ServiceProvider's native API.
+			An instance of this API binding can be obtained by calling <code class="code">getApi()</code>.
+			As an example, a Facebook connection instance would be parameterized as Connection&lt;Facebook&gt;.
+			<code class="code">getApi()</code> would return a Facebook instance that provides a Java binding to Facebook's graph API for a specific Facebook user.
+		</p>
+		<p>
+			Finally, the internal state of a connection can be captured for transfer between layers of your application by calling <code class="code">createData()</code>.
+			This could be used to persist the connection in a database, or serialize it over the network.
+		</p>
+		<p>
+			To put this model into action, suppose we have a reference to a Connection&lt;Twitter&gt; instance.
+			Suppose the connected user is the Twitter user with screen name 'kdonald'.
+			</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Connection#getKey() would return ('twitter', '14718006') where '14718006' is @kdonald's Twitter-assigned user id that never changes.</p></li><li class="listitem"><p>Connection#getDisplayName() would return '@kdonald'.</p></li><li class="listitem"><p>Connection#getProfileUrl() would return 'http://twitter.com/kdonald'.</p></li><li class="listitem"><p>Connection#getImageUrl() would return 'http://a0.twimg.com/profile_images/105951287/IMG_5863_2_normal.jpg'.</p></li><li class="listitem"><p>Connection#sync() would synchronize the state of the connection with @kdonald's profile.</p></li><li class="listitem">
+					<p>
+						Connection#test() would return true indicating the authorization credentials associated with the Twitter connection are valid.
+						This assumes Twitter has not revoked the AcmeApp client application, and @kdonald has not reset his authorization credentials (Twitter connections do not expire).
+					</p>
+				</li><li class="listitem"><p>Connection#hasExpired() would return false.</p></li><li class="listitem"><p>Connection#refresh() would not do anything since connections to Twitter do not expire.</p></li><li class="listitem"><p>Connection#fetchUserProfile() would make a remote API call to Twitter to get @kdonald's profile data and normalize it into a UserProfile model.</p></li><li class="listitem"><p>Connection#updateStatus(String) would post a status update to @kdonald's timeline.</p></li><li class="listitem"><p>Connection#getApi() would return a Twitter giving the client application access to the full capabilities of Twitter's native API.</p></li><li class="listitem"><p>Connection#createData() would return ConnectionData that could be serialized and used to restore the connection at a later time.</p></li></ol></div><p>
+		</p>
+	</div>
+	<div class="section" title="2.2&nbsp;Establishing connections"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-establishing-connections"></a>2.2&nbsp;Establishing connections</h2></div></div></div>
+		
+		<p>
+			So far we have discussed how existing connections are modeled, but we have not yet discussed how new connections are established.
+			The manner in which connections between local users and provider users are established varies based on the authorization protocol used by the ServiceProvider.
+			Some service providers use OAuth, others use Basic Auth, others may use something else.
+			Spring Social currently provides native support for OAuth-based service providers, including support for OAuth 1 and OAuth 2.
+			This covers the leading social networks, such as Facebook and Twitter, all of which use OAuth to secure their APIs.
+			Support for other authorization protocols can be added by extending the framework.
+		</p>
+		<p>
+			Each authorization protocol is treated as an implementation detail where protocol-specifics are kept out of the core Connection API.
+			A ConnectionFactory abstraction encapsulates the construction of connections that use a specific authorization protocol.
+			In the following sections, we will discuss the major ConnectionFactory classes provided by the framework.
+			Each section will also describe the protocol-specific flow required to establish a new connection.
+		</p>
+		<div class="section" title="2.2.1&nbsp;OAuth2 service providers"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-oauth2"></a>2.2.1&nbsp;OAuth2 service providers</h3></div></div></div>
+			
+			<p>
+				OAuth 2 is rapidly becoming a preferred authorization protocol, and is used by major service providers such as Facebook, Github, Foursquare, and 37signals.
+				In Spring Social, a OAuth2ConnectionFactory is used to establish connections with a OAuth2-based service provider:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> OAuth2ConnectionFactory&lt;A&gt; <span class="hl-keyword">extends</span> ConnectionFactory&lt;A&gt; {
+
+    <span class="hl-keyword">public</span> OAuth2Operations getOAuthOperations();
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(AccessGrant accessGrant);
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(ConnectionData data);
+
+}
+				</pre><p>
+			</p>
+			<p>
+				<code class="methodname">getOAuthOperations()</code> returns an API to use to conduct the authorization flow, or "OAuth Dance", with a service provider.
+				The result of this flow is an <code class="classname">AccessGrant</code> that can be used to establish a connection with a local user account by calling <code class="methodname">createConnection</code>.
+				The OAuth2Operations interface is shown below:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> OAuth2Operations {
+
+    String buildAuthorizeUrl(GrantType grantType, OAuth2Parameters parameters);
+
+    String buildAuthenticateUrl(GrantType grantType, OAuth2Parameters parameters);
+
+    AccessGrant exchangeForAccess(String authorizationCode, String redirectUri, 
+        MultiValueMap&lt;String, String&gt; additionalParameters);
+
+    AccessGrant refreshAccess(String refreshToken, String scope, 
+            MultiValueMap&lt;String, String&gt; additionalParameters);
+
+}
+			</pre>			
+			<p>
+				Callers are first expected to call buildAuthorizeUrl(GrantType, OAuth2Parameters) to construct the URL to redirect the user to for connection authorization.
+				Upon user authorization, the authorizationCode returned by the provider should be exchanged for an AccessGrant.
+				The AccessGrant should then used to create a connection.
+				This flow is illustrated below:
+			</p>
+			<div class="mediaobject" align="center"><img src="images/oauth2_flow.png" align="middle"></div>
+      		<p>
+				As you can see, there is a back-and-forth conversation that takes place between the application and the service provider to grant the application access to the provider account.
+				This exchange, commonly known as the "OAuth Dance", follows these steps:
+			</p>
+			<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+					<p>
+						The flow starts by the application redirecting the user to the provider's authorization URL.
+						Here the provider displays a web page asking the user if he or she wishes to grant the application access to read and update their data.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The user agrees to grant the application access.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider redirects the user back to the application (via the redirect URI), passing an authorization code as a parameter.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application exchanges the authorization code for an access grant.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider issues the access grant to the application.
+						The grant includes an access token and a refresh token.
+						One receipt of these tokens, the "OAuth dance" is complete.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application uses the AccessGrant to establish a connection between the local user account and the external provider account.
+						With the connection established, the application can now obtain a reference to the Service API and invoke the provider on behalf of the user.
+					</p>
+				</li></ol></div>
+			<p>
+			 	The example code below shows use of a FacebookConnectionFactory to create a connection to Facebook using the OAuth2 server-side flow illustrated above.
+				Here, FacebookConnectionFactory is a subclass of OAuth2ConnectionFactory:
+				</p><pre class="programlisting">
+FacebookConnectionFactory connectionFactory = 
+    <span class="hl-keyword">new</span> FacebookConnectionFactory(<span class="hl-string">"clientId"</span>, <span class="hl-string">"clientSecret"</span>);
+OAuth2Operations oauthOperations = connectionFactory.getOAuthOperations();
+OAuth2Parameters params = <span class="hl-keyword">new</span> OAuth2Parameters();
+params.setRedirectUri(<span class="hl-string">"https://my-callback-url"</span>);
+String authorizeUrl = oauthOperations.buildAuthorizeUrl(GrantType.AUTHORIZATION_CODE, params);
+response.sendRedirect(authorizeUrl);
+
+<span class="hl-comment">// upon receiving the callback from the provider:</span>
+AccessGrant accessGrant = oauthOperations.exchangeForAccess(authorizationCode, <span class="hl-string">"https://my-callback-url"</span>, null);
+Connection&lt;Facebook&gt; connection = connectionFactory.createConnection(accessGrant);
+				</pre><p>
+			</p>
+			<p>
+				The following example illustrates the client-side "implicit" authorization flow also supported by OAuth2.
+				The difference between this flow and the server-side "authorization code" flow above is the provider callback directly contains the access grant (no additional exchange is necessary).
+				This flow is appropriate for clients incapable of keeping the access grant credentials confidential, such as a mobile device or JavaScript-based user agent.
+				</p><pre class="programlisting">
+FacebookConnectionFactory connectionFactory = 
+    <span class="hl-keyword">new</span> FacebookConnectionFactory(<span class="hl-string">"clientId"</span>, <span class="hl-string">"clientSecret"</span>);
+OAuth2Operations oauthOperations = connectionFactory.getOAuthOperations();
+OAuth2Parameters params = <span class="hl-keyword">new</span> OAuth2Parameters();
+params.setRedirectUri(<span class="hl-string">"https://my-callback-url"</span>);
+String authorizeUrl = oauthOperations.buildAuthorizeUrl(GrantType.IMPLICIT_GRANT, params);
+response.sendRedirect(authorizeUrl);
+
+<span class="hl-comment">// upon receiving the callback from the provider:</span>
+AccessGrant accessGrant = <span class="hl-keyword">new</span> AccessGrant(accessToken);
+Connection&lt;Facebook&gt; connection = connectionFactory.createConnection(accessGrant);
+				</pre><p>
+			</p>
+		</div>
+		<div class="section" title="2.2.2&nbsp;OAuth1 service providers"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-oauth1"></a>2.2.2&nbsp;OAuth1 service providers</h3></div></div></div>
+			
+			OAuth 1 is the previous version of the OAuth protocol.
+			It is more complex OAuth 2, and sufficiently different that it is supported separately.
+			Twitter, Linked In, and TripIt are some of the well-known ServiceProviders that use OAuth 1.
+			In Spring Social, the OAuth1ConnectionFactory allows you to create connections to a OAuth1-based Service Provider:			
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> OAuth1ConnectionFactory&lt;A&gt; <span class="hl-keyword">extends</span> ConnectionFactory&lt;A&gt; {
+
+    <span class="hl-keyword">public</span> OAuth1Operations getOAuthOperations();
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(OAuthToken accessToken);
+
+    <span class="hl-keyword">public</span> Connection&lt;A&gt; createConnection(ConnectionData data);
+
+}
+			</pre>
+			<p>
+				Like a OAuth2-based provider, <code class="methodname">getOAuthOperations()</code> returns an API to use to conduct the authorization flow, or "OAuth Dance".
+				The result of the OAuth 1 flow is an <code class="classname">OAuthToken</code> that can be used to establish a connection with a local user account by calling <code class="methodname">createConnection</code>.
+				The OAuth1Operations interface is shown below:				
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> OAuth1Operations {
+
+    OAuthToken fetchRequestToken(String callbackUrl, 
+        MultiValueMap&lt;String, String&gt; additionalParameters);
+
+    String buildAuthorizeUrl(String requestToken, OAuth1Parameters parameters);
+
+    String buildAuthenticateUrl(String requestToken, OAuth1Parameters parameters);
+
+    OAuthToken exchangeForAccessToken(AuthorizedRequestToken requestToken, 
+        MultiValueMap&lt;String, String&gt; additionalParameters);
+
+}
+			</pre>			
+			<p>
+				Callers are first expected to call fetchNewRequestToken(String) to obtain a temporary token from the ServiceProvider to use during the authorization session.
+				Next, callers should call buildAuthorizeUrl(String, OAuth1Parameters) to construct the URL to redirect the user to for connection authorization.
+				Upon user authorization, the authorized request token returned by the provider should be exchanged for an access token.
+				The access token should then used to create a connection.
+				This flow is illustrated below:				
+			</p>
+			<div class="mediaobject" align="center"><img src="images/oauth1_flow.png" align="middle"></div>
+			<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+					<p>
+						The flow starts with the application asking for a request token.
+						The purpose of the request token is to obtain user approval and it can only be used to obtain an access token.
+						In OAuth 1.0a, the consumer callback URL is passed to the provider when asking for a request token.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider issues a request token to the consumer.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application redirects the user to the provider's authorization page, passing the request token as a parameter.
+						In OAuth 1.0, the callback URL is also passed as a parameter in this step.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider prompts the user to authorize the consumer application and the user agrees.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider redirects the user's browser back to the application (via the callback URL).
+						In OAuth 1.0a, this redirect includes a verifier code as a parameter. At this point, the request token is authorized.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application exchanges the authorized request token (including the verifier in OAuth 1.0a) for an access token.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The service provider issues an access token to the consumer. The "dance" is now complete.
+					</p>
+				</li><li class="listitem">
+					<p>
+						The application uses the access token to establish a connection between the local user account and the external provider account.
+						With the connection established, the application can now obtain a reference to the Service API and invoke the provider on behalf of the user.
+					</p>
+				</li></ol></div>
+			<p>
+				The example code below shows use of a TwitterConnectionFactory to create a connection to Facebook using the OAuth1 server-side flow illustrated above.
+				Here, TwitterConnectionFactory is a subclass of OAuth1ConnectionFactory:
+				</p><pre class="programlisting">
+TwitterConnectionFactory connectionFactory = 
+    <span class="hl-keyword">new</span> TwitterConnectionFactory(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>);
+OAuth1Operations oauthOperations = connectionFactory.getOAuthOperations();
+OAuthToken requestToken = oauthOperations.fetchRequestToken(<span class="hl-string">"https://my-callback-url"</span>, null);
+String authorizeUrl = oauthOperations.buildAuthorizeUrl(requestToken, OAuth1Parameters.NONE);
+response.sendRedirect(authorizeUrl);
+
+<span class="hl-comment">// upon receiving the callback from the provider:</span>
+OAuthToken accessToken = oauthOperations.exchangeForAccessToken(
+    <span class="hl-keyword">new</span> AuthorizedRequestToken(requestToken, oauthVerifier), null);
+Connection&lt;Twitter&gt; connection = connectionFactory.createConnection(accessToken);
+				</pre><p>
+			</p>
+		</div>
+		<div class="section" title="2.2.3&nbsp;Registering ConnectionFactory instances"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-establishing-connections-connection-factory-registry"></a>2.2.3&nbsp;Registering ConnectionFactory instances</h3></div></div></div>
+			
+			<p>
+				As you will see in subsequent sections of this reference guide, Spring Social provides infrastructure for establishing connections to one or more providers in a dynamic, self-service manner.
+				For example, one client application may allow users to connect to Facebook, Twitter, and LinkedIn. Another might integrate Github and Pivotal Tracker.
+				To make the set of connectable providers easy to manage and locate, Spring Social provides a registry for centralizing connection factory instances:
+			</p>
+			<pre class="programlisting">
+ConnectionFactoryRegistry registry = <span class="hl-keyword">new</span> ConnectionFactoryRegistry();
+registry.addConnectionFactory(<span class="hl-keyword">new</span> FacebookConnectionFactory(<span class="hl-string">"clientId"</span>, <span class="hl-string">"clientSecret"</span>));
+registry.addConnectionFactory(<span class="hl-keyword">new</span> TwitterConnectionFactory(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>));
+registry.addConnectionFactory(<span class="hl-keyword">new</span> LinkedInConnectionFactory(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>));	
+			</pre>
+			<p>
+				This registry implements a locator interface that other objects can use to lookup connection factories dynamically:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectionFactoryLocator {
+
+    ConnectionFactory&lt;?&gt; getConnectionFactory(String providerId);
+
+    &lt;A&gt; ConnectionFactory&lt;A&gt; getConnectionFactory(Class&lt;A&gt; apiType);
+	
+    Set&lt;String&gt; registeredProviderIds();
+
+}	
+			</pre>
+			<p>
+				Example usage of a ConnectionFactoryLocator is shown below:
+			</p>
+			<pre class="programlisting">
+<span class="hl-comment">// generic lookup by providerId</span>
+ConnectionFactory&lt;?&gt; connectionFactory = locator.getConnectionFactory(<span class="hl-string">"facebook"</span>);
+
+<span class="hl-comment">// typed lookup by service api type</span>
+ConnectionFactory&lt;Facebook&gt; connectionFactory = locator.getConnectionFactory(Facebook.<span class="hl-keyword">class</span>);	
+			</pre>			
+		</div>
+	</div>
+	<div class="section" title="2.3&nbsp;Persisting connections"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-persisting-connections"></a>2.3&nbsp;Persisting connections</h2></div></div></div>
+		
+		<p>
+			After a connection has been established, you may wish to persist it for later use.
+			This makes things convenient for the user since a connection can simply be restored from its persistent form and does not need to be established again.
+			Spring Social provides a ConnectionRepository interface for managing the persistence of a user's connections:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectionRepository {
+
+    MultiValueMap&lt;String, Connection&lt;?&gt;&gt; findAllConnections();
+	
+    List&lt;Connection&lt;?&gt;&gt; findConnections(String providerId);
+
+    &lt;A&gt; List&lt;Connection&lt;A&gt;&gt; findConnections(Class&lt;A&gt; apiType);
+
+    MultiValueMap&lt;String, Connection&lt;?&gt;&gt; findConnectionsToUsers(
+        MultiValueMap&lt;String, String&gt; providerUserIds);
+
+    Connection&lt;?&gt; getConnection(ConnectionKey connectionKey);
+
+    &lt;A&gt; Connection&lt;A&gt; getConnection(Class&lt;A&gt; apiType, String providerUserId);	
+
+    &lt;A&gt; Connection&lt;A&gt; getPrimaryConnection(Class&lt;A&gt; apiType);
+
+    &lt;A&gt; Connection&lt;A&gt; findPrimaryConnection(Class&lt;A&gt; apiType);
+	
+    <span class="hl-keyword">void</span> addConnection(Connection&lt;?&gt; connection);
+
+    <span class="hl-keyword">void</span> updateConnection(Connection&lt;?&gt; connection);
+
+    <span class="hl-keyword">void</span> removeConnections(String providerId);
+
+    <span class="hl-keyword">void</span> removeConnection(ConnectionKey connectionKey);
+
+}
+		</pre>
+		<p>
+			As you can see, this interface provides a number of operations for adding, updating, removing, and finding Connections.
+			Consult the JavaDoc API of this interface for a full description of these operations.
+			Note that all operations on this repository are scoped relative to the "current user" that has authenticated with your local application.
+			For standalone, desktop, or mobile environments that only have one user this distinction isn't important.
+			In a multi-user web application environment, this implies ConnectionRepository instances will be request-scoped.
+		</p>
+		<p>
+			For multi-user environments, Spring Social provides a UsersConnectionRepository that provides access to the global store of connections across all users:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> UsersConnectionRepository {
+
+    List&lt;String&gt; findUserIdsWithConnection(Connection&lt;?&gt; connection);
+
+    Set&lt;String&gt; findUserIdsConnectedTo(String providerId, Set&lt;String&gt; providerUserIds);
+
+    ConnectionRepository createConnectionRepository(String userId);
+
+}
+		</pre>
+		<p>
+			As you can see, this repository acts as a factory for ConnectionRepository instances scoped to a single user, as well as exposes a number of multi-user operations.
+			These operations include the ability to lookup the local userIds associated with connections to support provider user sign-in and "registered friends" scenarios.
+			Consult the JavaDoc API of this interface for a full description.
+		</p>
+		<div class="section" title="2.3.1&nbsp;JDBC-based persistence"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-persisting-connections-jdbc"></a>2.3.1&nbsp;JDBC-based persistence</h3></div></div></div>
+			
+			<p>
+				Spring Social provides a JdbcUsersConnectionRepository implementation capable of persisting connections to a RDBMS.
+				The database schema designed to back this repository is defined as follows:
+			</p>
+			
+  			<pre class="programlisting">
+create table UserConnection (userId varchar(255) not null,
+    providerId varchar(255) not null,
+    providerUserId varchar(255),
+    rank int not null,
+    displayName varchar(255),
+    profileUrl varchar(512),
+    imageUrl varchar(512),
+    accessToken varchar(255) not null,					
+    secret varchar(255),
+    refreshToken varchar(255),
+    expireTime bigint,
+    primary key (userId, providerId, providerUserId));
+create unique index UserConnectionRank on UserConnection(userId, providerId, rank);
+  			</pre>
+
+			<p>
+				For convenience is bootstrapping the schema from a running application, this schema definition is available in the <code class="code">spring-social-core</code> module as a resource at the path /org/springframework/social/connect/jdbc/JdbcUsersConnectionRepository.sql.
+				Note that although this schema was designed with compatibility in mind, it may not be compatible with all databases.
+				You may need to adapt this schema definition to accommodate any peculiarities of your chosen database.
+			</p>
+
+			<p>
+				The implementation also provides support for encrypting authorization credentials so they are not stored in plain-text.
+			</p>
+			
+			<p>
+				The example code below demonstrates construction and usage of a JdbcUsersConnectionRepository:
+			</p>
+			<pre class="programlisting">
+<span class="hl-comment">// JDBC DataSource pointing to the DB where connection data is stored</span>
+DataSource dataSource = ...;
+
+<span class="hl-comment">// locator for factories needed to construct Connections when restoring from persistent form</span>
+ConnectionFactoryLocator connectionFactoryLocator = ...;
+
+<span class="hl-comment">// encryptor of connection authorization credentials</span>
+TextEncryptor encryptor = ...;
+
+UsersConnectionRepository usersConnectionRepository =
+    <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(dataSource, connectionFactoryLocator, encryptor);
+
+<span class="hl-comment">// create a connection repository for the single-user 'kdonald'</span>
+ConnectionRepository repository = usersConnectionRepository.createConnectionRepository(<span class="hl-string">"kdonald"</span>);
+
+<span class="hl-comment">// find kdonald's primary Facebook connection</span>
+Connection&lt;Facebook&gt; connection = repository.findPrimaryConnection(Facebook.<span class="hl-keyword">class</span>);
+			</pre>
+		</div>
+	</div>
+</div>
+    <div class="chapter" title="3.&nbsp;Adding Support for a New Service Provider"><div class="titlepage"><div><div><h2 class="title"><a name="implementing"></a>3.&nbsp;Adding Support for a New Service Provider</h2></div></div></div>
+	
+	<p>
+		Spring Social makes it easy to add support for service providers that are not already supported by the framework.
+		If you review the existing client modules, such as spring-social-twitter and spring-social-facebook, you will discover they are implemented in a consistent manner and they apply a set of well-defined extension points.
+		In this chapter, you will learn how to add support for new service providers you wish to integrate into your applications.
+	</p>
+	<div class="section" title="3.1&nbsp;Process overview"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing"></a>3.1&nbsp;Process overview</h2></div></div></div>
+		
+		<p>
+			The process of adding support for a new service provider consists of several steps:
+			</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+					<p>Create a source project for the client code e.g. <code class="code">spring-social-twitter</code>.</p>
+				</li><li class="listitem">
+					<p>Develop or integrate a Java binding to the provider's API e.g. <code class="code">Twitter</code>.</p>
+				</li><li class="listitem">
+					<p>Create a ServiceProvider model that allows users to authorize with the remote provider and obtain authorized  API instances e.g. <code class="code">TwitterServiceProvider</code>.</p>
+				</li><li class="listitem">
+					<p>Create an ApiAdapter that maps the provider's native API onto the uniform Connection model e.g. <code class="code">TwitterAdapter</code>.</p>
+				</li><li class="listitem">
+					<p>Finally, create a ConnectionFactory that wraps the other artifacts up and provides a simple interface for establishing connections e.g. <code class="code">TwitterConnectionFactory</code>.</p>
+				</li></ol></div><p>
+		</p>
+		<p>
+			The following sections of this chapter walk you through each of the steps with examples.
+		</p>
+	</div>
+	<div class="section" title="3.2&nbsp;Creating a source project for the provider client code"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-project"></a>3.2&nbsp;Creating a source project for the provider client code</h2></div></div></div>
+		
+		<p>
+			A Spring Social client module is a standard Java project that builds a single jar artifact e.g. spring-social-twitter.jar.
+			We recommend the code structure of a client module follow the guidelines described below.
+		</p>
+		<div class="section" title="3.2.1&nbsp;Code structure guidelines"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-project-structure"></a>3.2.1&nbsp;Code structure guidelines</h3></div></div></div>
+			
+			<p>
+				We recommend the code for a new Spring Social client module reside within the <code class="code">org.springframework.social.{providerId}</code> base package,
+				where {providerId} is a unique identifier you assign to the service provider you are adding support for.
+				Consider some of the providers already supported by the framework as examples:
+				</p><div class="table"><a name="service-providers-implementing-project-structure-examples"></a><p class="title"><b>Table&nbsp;3.1.&nbsp;Spring Social Client Modules</b></p><div class="table-contents">
+					
+					<table summary="Spring Social Client Modules" style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; "><colgroup><col align="left"><col><col></colgroup><thead><tr><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Provider ID</th><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Artifact Name</th><th style="border-bottom: 0.5pt solid ; " align="center">Base Package</th></tr></thead><tbody><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">facebook</td><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; ">spring-social-facebook</td><td style="border-bottom: 0.5pt solid ; ">org.springframework.social.facebook</td></tr><tr><td style="border-right: 0.5pt solid ; " align="left">twitter</td><td style="border-right: 0.5pt solid ; ">spring-social-twitter</td><td style="">org.springframework.social.twitter</td></tr></tbody></table>
+				</div></div><p><br class="table-break">
+			</p>
+			<p>
+				Within the base package, we recommend the following subpackage structure:
+				</p><div class="table"><a name="d4e372"></a><p class="title"><b>Table&nbsp;3.2.&nbsp;Module Structure</b></p><div class="table-contents">
+					
+					<table summary="Module Structure" style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; "><colgroup><col align="left"><col></colgroup><thead><tr><th style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="center">Subpackage</th><th style="border-bottom: 0.5pt solid ; " align="center">Description</th></tr></thead><tbody><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">api</td><td style="border-bottom: 0.5pt solid ; ">The public interface that defines the API binding.</td></tr><tr><td style="border-right: 0.5pt solid ; border-bottom: 0.5pt solid ; " align="left">api.impl</td><td style="border-bottom: 0.5pt solid ; ">The implementation of the API binding.</td></tr><tr><td style="border-right: 0.5pt solid ; " align="left">connect</td><td style="">The types necessary to establish connections to the service provider.</td></tr></tbody></table>
+				</div></div><p><br class="table-break">
+			</p>
+			<p>
+				You can see this recommended structure in action by reviewing one of the other client modules such as spring-social-twitter:
+				</p><div class="mediaobject" align="center"><img src="images/spring-social-twitter-example.png" align="middle"></div><p>
+			</p>
+			<p>
+				Here, the central service API type, Twitter, is located in the api package along with its supporting operations types and data transfer object types.
+				The primary implementation of that interface, TwitterTemplate, is located in the api.impl package (along with other package-private impl types have that been excluded from this view).
+				Finally, the connect package contains the implementations of various connect SPIs that enable connections to Twitter to be established and persisted.
+			</p>
+		</div>
+	</div>
+	<div class="section" title="3.3&nbsp;Developing a Java binding to the provider's API"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-api"></a>3.3&nbsp;Developing a Java binding to the provider's API</h2></div></div></div>
+		
+		<p>
+			Spring Social favors the development of strongly-typed Java bindings to external service provider APIs.
+			This provides a simple, domain-oriented interface for Java applications to use to consume the API.
+			When adding support for a new service provider, if no suitable Java binding already exists you'll need to develop one.
+			If one already exists, such as Twitter4j for example, it is possible to integrate it into the framework. 
+		</p>
+		<div class="section" title="3.3.1&nbsp;Designing a new Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-new-designing"></a>3.3.1&nbsp;Designing a new Java API binding</h3></div></div></div>
+			
+			<p>
+				API developers retain full control over the design and implementation of their Java bindings.
+				That said, we offer several design guidelines in an effort to improve overall consistency and quality:
+				</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+						<p>
+							<span class="emphasis"><em>Favor separating the API binding interface from the implementation.</em></span>
+							This is illustrated in the spring-social-twitter example in the previous section.
+							There, "Twitter" is the central API binding type and it is declared in the org.springframework.social.twitter.api package with other public types.
+							"TwitterTemplate" is the primary implementation of this interface and is located in the org.springframework.social.twitter.api.impl subpackage along with other package-private implementation types.
+						</p>
+					</li><li class="listitem">
+						<p>
+							<span class="emphasis"><em>Favor organizing the API binding hierarchically by RESTful resource.</em></span>
+							REST-based APIs typically expose access to a number of resources in an hierarchical manner.
+							For example, Twitter's API provides access to "status timelines", "searches", "lists", "direct messages", "friends", "geo location", and "users".
+							Rather than add all operations across these resources to a single flat "Twitter" interface, the Twitter interface is organized hierarchically:
+							</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> Twitter <span class="hl-keyword">extends</span> ApiBinding {
+	
+    DirectMessageOperations directMessageOperations();
+
+    FriendOperations friendOperations();
+
+    GeoOperations geoOperations();
+
+    ListOperations listOperations();
+
+    SearchOperations searchOperations();
+	
+    TimelineOperations timelineOperations();
+
+    UserOperations userOperations();
+
+}</pre><p>
+						</p>
+						<p>
+							DirectMessageOperations, for example, contains API bindings to Twitter's "direct_messages" resource:
+							</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> DirectMessageOperations {
+
+    List&lt;DirectMessage&gt; getDirectMessagesReceived();
+
+    List&lt;DirectMessage&gt; getDirectMessagesSent();
+
+    <span class="hl-keyword">void</span> sendDirectMessage(String toScreenName, String text);
+
+    <span class="hl-keyword">void</span> sendDirectMessage(<span class="hl-keyword">long</span> toUserId, String text);
+	
+    <span class="hl-keyword">void</span> deleteDirectMessage(<span class="hl-keyword">long</span> messageId);
+}
+							</pre><p>
+						</p>
+					</li></ul></div><p>
+			</p>
+		</div>
+		<div class="section" title="3.3.2&nbsp;Implementing a new Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-new-implementing"></a>3.3.2&nbsp;Implementing a new Java API binding</h3></div></div></div>
+			
+			<p>
+				API developers are free to implement their Java API binding with whatever REST/HTTP client they see fit.
+				That said, Spring Social's existing API bindings such as spring-social-twitter all use Spring Framework's RestTemplate in conjunction with the Jackson JSON ObjectMapper and Apache HttpComponents HTTP client.
+				RestTemplate is a popular REST client that provides a uniform object mapping interface across a variety of data exchange formats (JSON, XML, etc).
+				Jackson is the leading Java-based JSON marshalling technology.
+				Apache HttpComponents has proven to be the most robust HTTP client (if it is not available on the classpath Spring Social will fallback to standard J2SE facilities, however).
+				To help promote consistency across Spring Social's supported bindings, we do recommend you consider these implementation technologies (and please let us know if they do not meet your needs).
+			</p>
+			<p>
+				Spring Social has adopted a convention where each API implementation class is named "{ProviderId}Template" e.g. TwitterTemplate.
+				We favor this convention unless there is a good reason to deviate from it.
+				As discussed in the previous section, we recommend keeping implementation types separate from the public API types.
+				We also recommend keeping internal implementation details package-private.
+			</p>
+			<p>
+				The way in which an API binding implementation is constructed will vary based on the API's authorization protocol.
+				For APIs secured with OAuth1, the consumerKey, consumerSecret, accessToken, and accessTokenSecret will be required for construction:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterTemplate(String consumerKey, String consumerSecret, String accessToken, 
+    String accessTokenSecret) { ... }
+				</pre><p>				
+			</p>
+			<p>
+				For OAuth2, only the access token should be required:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> FacebookTemplate(String accessToken) { ... }
+				</pre><p>
+			</p>
+			<p>
+				Each request made to the API server needs to be signed with the authorization credentials provided during construction of the binding.
+				This signing process consists of adding an "Authorization" header to each client request before it is executed.
+				For OAuth1, the process is quite complicated, and is used to support an elaborate request signature verification algorithm between the client and server.
+				For OAuth2, it is a lot simpler, but does still vary across the various drafts of the OAuth2 specification.
+			</p>
+			<p>
+				To encapsulate this complexity, for each authorization protocol Spring Social provides a ApiTemplate base class you may extend from to
+				construct a pre-configured RestTemplate instance that performs the request signing for you. For OAuth1:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TwitterTemplate <span class="hl-keyword">extends</span> AbstractOAuth1ApiBinding {
+    <span class="hl-keyword">public</span> TwitterTemplate(String consumerKey, String consumerSecret, String accessToken, 
+            String accessTokenSecret) {
+        <span class="hl-keyword">super</span>(consumerKey, consumerSecret, accessToken, accessTokenSecret);
+    }
+}			</pre><p>
+			</p>
+			<p>
+				An OAuth2 example:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> FacebookTemplate <span class="hl-keyword">extends</span> AbstractOAuth2ApiBinding {
+    <span class="hl-keyword">public</span> FacebookTemplate(String accessToken) {
+        <span class="hl-keyword">super</span>(accessToken);
+    }
+}
+				</pre><p>
+			</p>
+			<p>
+				Once configured as shown above, you simply implement call getRestTemplate() and implement the various API operations.
+				The existing Spring Social client modules all invoke their RestTemplate instances in a standard manner:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterProfile getUserProfile() {
+    <span class="hl-keyword">return</span> getRestTemplate().getForObject(buildUri(<span class="hl-string">"account/verify_credentials.json"</span>),
+        TwitterProfile.<span class="hl-keyword">class</span>);
+}
+				</pre><p>
+			</p>
+			<p>
+				A note on RestTemplate usage: we do favor the RestTemplate methods that accept a URI object instead of a uri String.
+				This ensures we always properly encode client data submitted in URI query parameters, such as screen_name below:
+				</p><pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterProfile getUserProfile(String screenName) {
+    <span class="hl-keyword">return</span> getRestTemplate().getForObject(buildUri(<span class="hl-string">"users/show.json"</span>, 
+        Collections.singletonMap(<span class="hl-string">"screen_name"</span>, screenName)), TwitterProfile.<span class="hl-keyword">class</span>);
+}
+				</pre><p>
+			</p>
+			<p>
+				For complete implementation examples, consult the source of the existing API bindings included in Spring Social.
+				The <code class="code">spring-social-twitter</code> and <code class="code">spring-social-facebook</code> modules provide particularly good references.
+			</p>
+		</div>
+		<div class="section" title="3.3.3&nbsp;Testing a new Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-new-testing"></a>3.3.3&nbsp;Testing a new Java API binding</h3></div></div></div>
+			
+			<p>
+				As part of the spring-social-test module, Spring Social includes a framework for unit testing API bindings.
+				This framework consists of a "MockRestServiceServer" that can be used to mock out API calls to the remote service provider.
+				This allows for the development of independent, performant, automated unit tests that verify client API binding and object mapping behavior.
+			</p>
+			<p>
+				To use, first create a MockRestServiceServer against the RestTemplate instance used by your API implementation:
+			</p>
+			<pre class="programlisting">
+TwitterTemplate twitter = <span class="hl-keyword">new</span> TwitterTemplate(<span class="hl-string">"consumerKey"</span>, <span class="hl-string">"consumerSecret"</span>, <span class="hl-string">"accessToken"</span>,
+    <span class="hl-string">"accessTokenSecret"</span>);
+MockRestServer mockServer = MockRestServiceServer.createServer(twitter.getRestTemplate());
+			</pre>
+			<p>
+				Then, for each test case, record expectations about how the server should be invoked and answer what it should respond with:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Test</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">void</span> getUserProfile() {
+    HttpHeaders responseHeaders = <span class="hl-keyword">new</span> HttpHeaders();
+    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+    
+    mockServer.expect(requestTo(<span class="hl-string">"https://api.twitter.com/1/account/verify_credentials.json"</span>))
+        .andExpect(method(GET))
+        .andRespond(withResponse(jsonResource(<span class="hl-string">"verify-credentials"</span>), responseHeaders));
+
+    TwitterProfile profile = twitter.userOperations().getUserProfile();
+    assertEquals(<span class="hl-number">161064614</span>, profile.getId());
+    assertEquals(<span class="hl-string">"kdonald"</span>, profile.getScreenName());
+}
+			</pre>
+			<p>
+				In the example above the response body is written from a verify-credentials.json file located in the same package as the test class:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">private</span> Resource jsonResource(String filename) {
+    <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> ClassPathResource(filename + <span class="hl-string">".json"</span>, getClass());
+}
+			</pre>
+			<p>
+				The content of the file should mirror the content the remote service provider would return, allowing the client JSON deserialization behavior to be fully tested:
+			</p>
+			<pre class="programlisting">
+{
+    <span class="hl-string">"id"</span>:<span class="hl-number">161064614</span>,
+    <span class="hl-string">"screen_name"</span>:<span class="hl-string">"kdonald"</span>
+}
+			</pre>
+			<p>
+				For complete test examples, consult the source of the existing API bindings included in Spring Social.
+				The <code class="code">spring-social-twitter</code> and <code class="code">spring-social-facebook</code> modules provide particularly good references.
+			</p>
+		</div>				
+		<div class="section" title="3.3.4&nbsp;Integrating an existing Java API binding"><div class="titlepage"><div><div><h3 class="title"><a name="service-provider-implementing-api-existing-integrating"></a>3.3.4&nbsp;Integrating an existing Java API binding</h3></div></div></div>
+			
+			<p>
+				If you are adding support for a popular service provider, chances are a Java binding to the provider's API may already exist.
+				For example, the Twitter4j library has been around for awhile and provides a complete binding to Twitter's API.
+				Instead of developing your own binding, you may simply wish to integrate what already exists.
+				Spring Social's connect framework has been carefully designed to support this scenario.
+			</p>
+			<p>
+				To integrate an existing API binding, simply note the binding's primary API interface and implementation.
+				For example, in Twitter4j the main API interface is named "Twitter" and instances are constructed by a TwitterFactory.
+				You can always construct such an API instance directly, and you'll see in the following sections how to expose an instance as part of a Connection.
+			</p>
+		</div>
+	</div>
+	<div class="section" title="3.4&nbsp;Creating a ServiceProvider model"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-serviceprovider"></a>3.4&nbsp;Creating a ServiceProvider model</h2></div></div></div>
+		
+		<p>
+			As described in the previous section, a client binding to a secure API such as Facebook or Twitter requires valid user authorization credentials to work.
+			Such credentials are generally obtained by having your application conduct an authorization "dance" or handshake with the service provider.
+			Spring Social provides the ServiceProvider&lt;A&gt; abstraction to handle this "authorization dance".
+			The abstraction also acts as a factory for native API (A) instances.
+		</p>
+		<p>
+			Since the authorization dance is protocol-specific, a ServiceProvider specialization exists for each authorization protocol.
+			For example, if you are connecting to a OAuth2-based provider, you would implement OAuth2ServiceProvider.
+			After you've done this, your implementation can be used to conduct the OAuth2 dance and obtain an authorized API instance.
+			This is typically done in the context of a ConnectionFactory as part of establishing a new connection to the provider.
+			The following sections describe the implementation steps for each ServiceProvider type.
+		</p>
+		<div class="section" title="3.4.1&nbsp;OAuth2"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceprovider-oauth2"></a>3.4.1&nbsp;OAuth2</h3></div></div></div>
+			
+			<p>
+				To implement an OAuth2-based ServiceProvider, first create a subclass of AbstractOAuth2ServiceProvider named {ProviderId}ServiceProvider.
+				Parameterize &lt;A&gt; to be the Java binding to the ServiceProvider's's API.
+				Define a single constructor that accepts an clientId and clientSecret.
+				Finally, implement getApi(String) to return a new API instance.
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.facebook.connect.FacebookServiceProvider</code> as an example OAuth2ServiceProvider:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">final</span> <span class="hl-keyword">class</span> FacebookServiceProvider <span class="hl-keyword">extends</span> AbstractOAuth2ServiceProvider&lt;Facebook&gt; {
+
+    <span class="hl-keyword">public</span> FacebookServiceProvider(String clientId, String clientSecret) {
+        <span class="hl-keyword">super</span>(<span class="hl-keyword">new</span> OAuth2Template(clientId, clientSecret,
+            <span class="hl-string">"https://graph.facebook.com/oauth/authorize"</span>,
+            <span class="hl-string">"https://graph.facebook.com/oauth/access_token"</span>));
+    }
+
+    <span class="hl-keyword">public</span> Facebook getApi(String accessToken) {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> FacebookTemplate(accessToken);
+    }
+
+}
+			</pre>
+			<p>
+				In the constructor, you should call super, passing up the configured OAuth2Template that implements OAuth2Operations.
+				The OAuth2Template will handle the "OAuth dance" with the provider, and should be configured with the provided clientId and clientSecret, along with the provider-specific authorizeUrl and accessTokenUrl.
+			</p>
+			<p>
+				Some providers support provider sign-in (see <a class="xref" href="#signin" title="5.&nbsp;Signing in with Service Provider Accounts">Chapter&nbsp;5, <i>Signing in with Service Provider Accounts</i></a>) through an authentication URL that is distinct from the authorization URL.
+				Using the OAuth2Template constructor as shown above will assume that the authentication URL is the same as the authorization URL.
+				But you may specify a different authentication URL by using OAuth2Template's other constructor.
+				Facebook does not have a separate authentication URL, but for the sake of the example, suppose that Facebook's authentication URL is "https://graph.facebook.com/oauth/authenticate".
+				The following implementation of the FacebookServiceProvider constructor configures the OAuth2Template for that case:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> FacebookServiceProvider(String clientId, String clientSecret) {
+    <span class="hl-keyword">super</span>(<span class="hl-keyword">new</span> OAuth2Template(clientId, clientSecret,
+        <span class="hl-string">"https://graph.facebook.com/oauth/authorize"</span>,
+        <span class="hl-string">"https://graph.facebook.com/oauth/authenticate"</span>,
+        <span class="hl-string">"https://graph.facebook.com/oauth/access_token"</span>));
+}
+			</pre>
+			<p>
+				In getApi(String), you should construct your API implementation, passing it the access token needed to make authorized requests for protected resources.
+			</p>
+		</div>
+		<div class="section" title="3.4.2&nbsp;OAuth1"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceprovider-oauth1"></a>3.4.2&nbsp;OAuth1</h3></div></div></div>
+			
+			<p>
+				To implement an OAuth1-based ServiceProvider, first create a subclass of AbstractOAuth1ServiceProvider named {ProviderId}ServiceProvider.
+				Parameterize &lt;A&gt; to be the Java binding to the ServiceProvider's API.
+				Define a single constructor that accepts a consumerKey and consumerSecret.
+				Finally, implement getApi(String, String) to return a new API instance.
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.twitter.connect.TwitterServiceProvider</code> as an example OAuth1ServiceProvider:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">final</span> <span class="hl-keyword">class</span> TwitterServiceProvider <span class="hl-keyword">extends</span> AbstractOAuth1ServiceProvider&lt;Twitter&gt; {
+
+    <span class="hl-keyword">public</span> TwitterServiceProvider(String consumerKey, String consumerSecret) {
+        <span class="hl-keyword">super</span>(consumerKey, consumerSecret, <span class="hl-keyword">new</span> OAuth1Template(consumerKey, consumerSecret, 
+            <span class="hl-string">"https://twitter.com/oauth/request_token"</span>,
+            <span class="hl-string">"https://twitter.com/oauth/authorize"</span>,
+            <span class="hl-string">"https://twitter.com/oauth/authenticate"</span>,
+            <span class="hl-string">"https://twitter.com/oauth/access_token"</span>));
+    }
+
+    <span class="hl-keyword">public</span> Twitter getApi(String accessToken, String secret) {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> TwitterTemplate(getConsumerKey(), getConsumerSecret(), accessToken, secret);
+    }
+
+}
+			</pre>
+			<p>
+				In the constructor, you should call super, passing up the the consumerKey, secret, and configured OAuth1Template.
+				The OAuth1Template will handle the "OAuth dance" with the provider.
+				It should be configured with the provided consumerKey and consumerSecret, along with the provider-specific requestTokenUrl, authorizeUrl, authenticateUrl, and accessTokenUrl.
+				The authenticateUrl parameter is optional and may be left out if the provider doesn't have an authentication URL that is different than the authorization URL. 
+			</p>			
+			<p>
+				As you can see here, OAuth1Template is constructed with Twitter's authentication URL (used for provider sign-in; see <a class="xref" href="#signin" title="5.&nbsp;Signing in with Service Provider Accounts">Chapter&nbsp;5, <i>Signing in with Service Provider Accounts</i></a>), which is distinct from their authorization URL.
+				Some providers don't have separate URLs for authentication and authorization.
+				In those cases, you can use OAuth1Template's other constructor which doesn't take the authentication URL as a parameter.
+				For example, here's how the TwitterServiceProvider constructor would look without configuring the authentication URL:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> TwitterServiceProvider(String consumerKey, String consumerSecret) {
+    <span class="hl-keyword">super</span>(consumerKey, consumerSecret, <span class="hl-keyword">new</span> OAuth1Template(consumerKey, consumerSecret, 
+        <span class="hl-string">"https://twitter.com/oauth/request_token"</span>,
+        <span class="hl-string">"https://twitter.com/oauth/authorize"</span>,
+        <span class="hl-string">"https://twitter.com/oauth/access_token"</span>));
+}
+			</pre>
+			<p>
+				In getApi(String, String), you should construct your API implementation, passing it the four tokens needed to make authorized requests for protected resources.
+			</p>
+		</div>
+		<p>
+			Consult the JavaDoc API of the various service provider types for more information and subclassing options.
+		</p>
+	</div>
+	<div class="section" title="3.5&nbsp;Creating an ApiAdapter"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-serviceapiadapter"></a>3.5&nbsp;Creating an ApiAdapter</h2></div></div></div>
+		
+		<p>
+			As discussed in the previous chapter, one of the roles of a Connection is to provide a common abstraction for a linked user account that is applied across all service providers.
+			The role of the ApiAdapter is to map a provider's native API interface onto this uniform Connection model.
+			A connection delegates to its adapter to perform operations such as testing the validity of its API credentials, setting metadata values, fetching a user profile, and updating user status:
+			</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ApiAdapter&lt;A&gt; {
+
+    <span class="hl-keyword">boolean</span> test(A api);
+			
+    <span class="hl-keyword">void</span> setConnectionValues(A api, ConnectionValues values);
+
+    UserProfile fetchUserProfile(A api);
+	
+    <span class="hl-keyword">void</span> updateStatus(A api, String message);
+	
+}
+			</pre><p>
+			</p><p>
+				Consider <code class="code">org.springframework.social.twitter.connect.TwitterAdapter</code> as an example implementation:
+			</p><p>
+			</p><pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TwitterAdapter <span class="hl-keyword">implements</span> ApiAdapter&lt;Twitter&gt; {
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">boolean</span> test(Twitter twitter) {
+        <span class="hl-keyword">try</span> {
+            twitter.userOperations().getUserProfile();
+            <span class="hl-keyword">return</span> true;
+        } <span class="hl-keyword">catch</span> (ApiException e) {
+            <span class="hl-keyword">return</span> false;
+        }
+    }
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> setConnectionValues(Twitter twitter, ConnectionValues values) {
+        TwitterProfile profile = twitter.userOperations().getUserProfile();
+        values.setProviderUserId(Long.toString(profile.getId()));
+        values.setDisplayName(<span class="hl-string">"@"</span> + profile.getScreenName());
+        values.setProfileUrl(profile.getProfileUrl());
+        values.setImageUrl(profile.getProfileImageUrl());
+    }
+    
+    <span class="hl-keyword">public</span> UserProfile fetchUserProfile(Twitter twitter) {
+        TwitterProfile profile = twitter.userOperations().getUserProfile();
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> UserProfileBuilder().setName(profile.getName()).setUsername(
+            profile.getScreenName()).build();
+    }
+    
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> updateStatus(Twitter twitter, String message) {
+        twitter.timelineOperations().updateStatus(message);	
+    }
+	
+}
+			</pre><p>
+		</p>
+		<p>
+			As you can see, test(...) returns true if the API instance is functional and false if it is not.
+			setConnectionValues(...) sets the connection's providerUserId, displayName, profileUrl, and imageUrl properties from TwitterProfile data.
+			fetchUserProfile(...) maps a TwitterProfile onto the normalized UserProfile model.
+			updateStatus(...) update's the user's Twitter status.
+			Consult the JavaDoc for ApiAdapter and Connection for more information and implementation guidance.
+			We also recommend reviewing the other ApiAdapter implementations for additional examples.
+		</p>
+	</div>
+	<div class="section" title="3.6&nbsp;Creating a ConnectionFactory"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="service-providers-implementing-serviceproviderconnectionfactory"></a>3.6&nbsp;Creating a ConnectionFactory</h2></div></div></div>
+		
+		<p>
+			By now, you should have an API binding to the provider's API, a ServiceProvider&lt;A&gt; implementation for conducting the "authorization dance", and an ApiAdapter&lt;A&gt; implementation for mapping onto the uniform Connection model.
+			The last step in adding support for a new service provider is to create a ConnectionFactory that wraps up these artifacts and provides a simple interface for establishing Connections.
+			After this is done, you may use your connection factory directly, or you may add it to a registry where it can be used by the framework to establish connections in a dynamic, self-service manner.
+		</p>
+		<p>
+			Like a ServiceProvider&lt;A&gt;, a ConnectionFactory specialization exists for each authorization protocol.
+			For example, if you are adding support for a OAuth2-based provider, you would extend from OAuth2ConnectionFactory.
+			Implementation guidelines for each type are provided below.
+		</p>
+		<div class="section" title="3.6.1&nbsp;OAuth2"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceproviderconnectionfactory-oauth2"></a>3.6.1&nbsp;OAuth2</h3></div></div></div>
+			
+			<p>
+				Create a subclass of OAuth2ConnectionFactory&lt;A&gt; named {ProviderId}ConnectionFactory and parameterize A to be the Java binding to the service provider's API.
+				Define a single constructor that accepts a clientId and clientSecret.
+				Within the constructor call super, passing up the assigned providerId, a new {ProviderId}ServiceProvider instance configured with the clientId/clientSecret, and a new {Provider}Adapter instance. 			
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.facebook.connect.FacebookConnectionFactory</code> as an example OAuth2ConnectionFactory:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> FacebookConnectionFactory <span class="hl-keyword">extends</span> OAuth2ConnectionFactory&lt;Facebook&gt; {
+    <span class="hl-keyword">public</span> FacebookConnectionFactory(String clientId, String clientSecret) {
+        <span class="hl-keyword">super</span>(<span class="hl-string">"facebook"</span>, <span class="hl-keyword">new</span> FacebookServiceProvider(clientId, clientSecret), <span class="hl-keyword">new</span> FacebookAdapter());
+    }
+}
+			</pre>			
+		</div>		
+		<div class="section" title="3.6.2&nbsp;OAuth1"><div class="titlepage"><div><div><h3 class="title"><a name="service-providers-implementing-serviceproviderconnectionfactory-oauth1"></a>3.6.2&nbsp;OAuth1</h3></div></div></div>
+			
+			<p>
+				Create a subclass of OAuth1ConnectionFactory&lt;A&gt; named {ProviderId}ConnectionFactory and parameterize A to be the Java binding to the service provider's API.
+				Define a single constructor that accepts a consumerKey and consumerSecret.
+				Within the constructor call super, passing up the assigned providerId, a new {ProviderId}ServiceProvider instance configured with the consumerKey/consumerSecret, and a new {Provider}Adapter instance. 			
+			</p>
+			<p>
+				See <code class="code">org.springframework.social.twitter.connect.TwitterConnectionFactory</code> as an example OAuth1ConnectionFactory:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TwitterConnectionFactory <span class="hl-keyword">extends</span> OAuth1ConnectionFactory&lt;Facebook&gt; {
+    <span class="hl-keyword">public</span> TwitterConnectionFactory(String consumerKey, String consumerSecret) {
+        <span class="hl-keyword">super</span>(<span class="hl-string">"twitter"</span>, <span class="hl-keyword">new</span> TwitterServiceProvider(consumerKey, consumerSecret), <span class="hl-keyword">new</span> TwitterAdapter());
+    }
+}
+			</pre>
+			<p>
+				Consult the source and JavaDoc API for ConnectionFactory and its subclasses more information, examples, and advanced customization options.
+			</p>		
+		</div>
+	</div>		
+</div>
+    <div class="chapter" title="4.&nbsp;Connecting to Service Providers"><div class="titlepage"><div><div><h2 class="title"><a name="connecting"></a>4.&nbsp;Connecting to Service Providers</h2></div></div></div>
+	
+	<div class="section" title="4.1&nbsp;Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="section_connecting_introduction"></a>4.1&nbsp;Introduction</h2></div></div></div>
+		
+      	<p>
+      		In <a class="xref" href="#serviceprovider" title="2.&nbsp;Service Provider 'Connect' Framework">Chapter&nbsp;2, <i>Service Provider 'Connect' Framework</i></a>, you learned how Spring Social's <span class="emphasis"><em>Service Provider 'Connect' Framework</em></span> can be used to manage user connections that link your application's user accounts with accounts on external service providers.
+      		In this chapter, you'll learn how to control the connect flow in a web application environment.
+      	</p>
+		<p>
+			Spring Social's <code class="code">spring-social-web</code> module includes <code class="classname">ConnectController</code>, a Spring MVC controller that coordinates the connection flow between an application and service providers.
+			<code class="classname">ConnectController</code> takes care of redirecting the user to the service provider for authorization and responding to the callback after authorization.
+		</p>
+	</div>
+	<div class="section" title="4.2&nbsp;Configuring ConnectController"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="section_connecting_service_providers"></a>4.2&nbsp;Configuring ConnectController</h2></div></div></div>
+				
+		<p>
+			As <code class="classname">ConnectController</code> directs the overall connection flow, it depends on several other objects to do its job.
+			Before getting into those, first we'll define a single Java @Configuration class where the various Spring Social objects, including ConnectController, will be configured:
+			</p><pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+}
+			</pre><p>			
+		</p>
+		<p>
+			Now, <code class="classname">ConnectController</code> first delegates to one or more ConnectionFactory instances to establish connections to providers on behalf of users.
+			Once a connection has been established, it delegates to a <code class="interfacename">ConnectionRepository</code> to persist user connection data.
+		</p>
+		<p>
+			Each of the Spring Social provider modules includes a <code class="interfacename">ConnectionFactory</code> implementation:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="classname">org.springframework.social.twitter.connect.TwitterConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.facebook.connect.FacebookConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.linkedin.connect.LinkedInConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.tripit.connect.TripItConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.github.connect.GitHubConnectionFactory</code></p></li></ul></div>
+		<p>
+			To register one or more ConnectionFactories, simply define a ConnectionFactoryLocator @Bean as follows:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> ConnectionFactoryLocator connectionFactoryLocator() {
+        ConnectionFactoryRegistry registry = <span class="hl-keyword">new</span> ConnectionFactoryRegistry();
+        
+        registry.addConnectionFactory(<span class="hl-keyword">new</span> FacebookConnectionFactory(
+            environment.getProperty(<span class="hl-string">"facebook.clientId"</span>),
+            environment.getProperty(<span class="hl-string">"facebook.clientSecret"</span>)));
+        
+        registry.addConnectionFactory(<span class="hl-keyword">new</span> TwitterConnectionFactory(
+            environment.getProperty(<span class="hl-string">"twitter.consumerKey"</span>),
+            environment.getProperty(<span class="hl-string">"twitter.consumerSecret"</span>)));
+            
+        <span class="hl-keyword">return</span> registry;
+    }
+
+    <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+    <span class="hl-keyword">private</span> Environment environment;
+	
+}</pre>
+		<p>
+			Above, two connection factories, one for Facebook and one for Twitter, have been registered.
+			If you would like to support other providers, simply register their connection factories here.
+			Because client ids and secrets may be different across environments (e.g., test, production, etc), we recommend you externalize these values.
+		</p>	
+		<p>
+			As discussed in <a class="xref" href="#service-providers-persisting-connections" title="2.3&nbsp;Persisting connections">Section&nbsp;2.3, &#8220;Persisting connections&#8221;</a>, <code class="interfacename">ConnectionRepository</code> defines operations for persisting and restoring connections for a specific user. 
+			Therefore, when configuring a <code class="interfacename">ConnectionRepository</code> bean for use by ConnectController, it must be scoped such that it can be created on a per-user basis.
+			The following Java-based configuration shows how to construct an proxy to a request-scoped <code class="interfacename">ConnectionRepository</code> instance for the currently authenticated user:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <i><span class="hl-annotation" style="color: gray">@Scope(value="request", proxyMode=ScopedProxyMode.INTERFACES)</span></i>
+    <span class="hl-keyword">public</span> ConnectionRepository connectionRepository(
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        <span class="hl-keyword">if</span> (authentication == null) {
+            <span class="hl-keyword">throw</span> <span class="hl-keyword">new</span> IllegalStateException(<span class="hl-string">"Unable to get a ConnectionRepository: no user signed in"</span>);
+        }
+        <span class="hl-keyword">return</span> usersConnectionRepository().createConnectionRepository(authentication.getName());
+    }
+	
+}
+		</pre>	
+		<p>
+			The @Bean method above is injected with a <code class="classname">Principal</code> representing the current user's identity.
+			This is passed to UsersConnectionRepository to construct a ConnectionRepository instance for that user.
+		</p>	
+		<p>
+			This means that we're also going to need to configure a <code class="interfacename">UsersConnectionRepository</code> @Bean:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> UsersConnectionRepository usersConnectionRepository() {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(dataSource, connectionFactoryLocator(), 
+            textEncryptor);
+    }
+
+    <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+    <span class="hl-keyword">private</span> DataSource dataSource;
+
+    <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+    <span class="hl-keyword">private</span> TextEncryptor textEncryptor;	
+}
+		</pre>
+		<p>
+			UsersConnectionRepository is a singleton data store for connections across all users.
+			<code class="classname">JdbcUsersConnectionRepository</code> is the RDMS-based implementation and needs a <code class="interfacename">DataSource</code>, <code class="interfacename">ConnectionFactoryLocator</code>, and <code class="interfacename">TextEncryptor</code> to do its job.
+			It will use the <code class="interfacename">DataSource</code> to access the RDBMS when persisting and restoring connections.
+			When restoring connections, it will use the <code class="interfacename">ConnectionFactoryLocator</code> to locate ConnectionFactory instances.
+		</p>
+		<p>
+			<code class="classname">JdbcUsersConnectionRepository</code> uses the <code class="interfacename">TextEncryptor</code> to encrypt credentials when persisting connections.
+			Spring Security 3.1 makes a few useful text encryptors available via static factory methods in its <code class="classname">Encryptors</code> class.
+			For example, a no-op text encryptor is useful at development time and can be configured like this:
+		</p>		
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SecurityConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+    <i><span class="hl-annotation" style="color: gray">@Profile("dev")</span></i>
+    <span class="hl-keyword">static</span> <span class="hl-keyword">class</span> Dev {
+
+        <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+        <span class="hl-keyword">public</span> TextEncryptor textEncryptor() {
+            <span class="hl-keyword">return</span> Encryptors.noOpText();
+        }
+
+    }
+
+}
+		</pre>
+		<p>
+			Notice that the inner configuration class is annotated with <code class="code">@Profile("dev")</code>. 
+			Spring 3.1 introduced the profile concept where certain beans will only be created when certain profiles are active. 
+			Here, the <code class="code">@Profile</code> annotation ensures that this <code class="interfacename">TextEncryptor</code> will only be created when "dev" is an active profile. 
+			For production-time purposes, a stronger text encryptor is recommended and can be created when the "production" profile is active:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SecurityConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+    <i><span class="hl-annotation" style="color: gray">@Profile("prod")</span></i>
+    <span class="hl-keyword">static</span> <span class="hl-keyword">class</span> Prod {
+
+        <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+        <span class="hl-keyword">public</span> TextEncryptor textEncryptor() {
+            <span class="hl-keyword">return</span> Encryptors.queryableText(environment.getProperty(<span class="hl-string">"security.encryptPassword"</span>),
+                environment.getProperty(<span class="hl-string">"security.encryptSalt"</span>));
+        }
+
+        <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+        <span class="hl-keyword">private</span> Environment environment;
+
+    }
+
+}
+		</pre>
+		<div class="section" title="4.2.1&nbsp;Configuring connection support in XML"><div class="titlepage"><div><div><h3 class="title"><a name="d4e573"></a>4.2.1&nbsp;Configuring connection support in XML</h3></div></div></div>
+			
+			<p>
+				Up to this point, the connection support configuration has been done using Spring's Java-based configuration style. 
+				But you can configure it in either Java configuration or XML. 
+				Here's the XML equivalent of the <code class="classname">ConnectionFactoryRegistry</code> configuration: 			
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"connectionFactoryLocator"</span> 
+      <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.support.ConnectionFactoryRegistry"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"connectionFactories"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;list&gt;</span>
+            <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.twitter.connect.TwitterConnectionFactory"</span><span class="hl-tag">&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${twitter.consumerKey}"</span><span class="hl-tag"> /&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${twitter.consumerSecret}"</span><span class="hl-tag"> /&gt;</span>				
+            <span class="hl-tag">&lt;/bean&gt;</span>
+            <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.facebook.connect.FacebookConnectionFactory"</span><span class="hl-tag">&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${facebook.clientId}"</span><span class="hl-tag"> /&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${facebook.clientSecret}"</span><span class="hl-tag"> /&gt;</span>				
+            <span class="hl-tag">&lt;/bean&gt;</span>
+        <span class="hl-tag">&lt;/list&gt;</span>
+    <span class="hl-tag">&lt;/property&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+			</pre>	
+			<p>
+				This is functionally equivalent to the Java-based configuration of <code class="classname">ConnectionFactoryRegistry</code> shown before.
+			</p>
+			<p>
+				Here's an XML equivalent of the <code class="classname">JdbcUsersConnectionRepository</code> and <code class="classname">ConnectionRepository</code> configurations shown before:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"usersConnectionRepository"</span> 
+      <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.jdbc.JdbcUsersConnectionRepository"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">ref</span>=<span class="hl-value">"dataSource"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">ref</span>=<span class="hl-value">"connectionFactoryLocator"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">ref</span>=<span class="hl-value">"textEncryptor"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"connectionRepository"</span> <span class="hl-attribute">factory-method</span>=<span class="hl-value">"createConnectionRepository"</span> 
+      <span class="hl-attribute">factory-bean</span>=<span class="hl-value">"usersConnectionRepository"</span> <span class="hl-attribute">scope</span>=<span class="hl-value">"request"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"#{request.userPrincipal.name}"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;aop:scoped-proxy</span> <span class="hl-attribute">proxy-target-class</span>=<span class="hl-value">"false"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+			</pre>
+			<p>
+				Likewise, here is the equivalent configuration of the <code class="interfacename">TextEncryptor</code> beans:
+			</p>
+			<pre class="programlisting">
+<span class="hl-directive" style="color: maroon">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hl-tag">&lt;beans</span> <span class="hl-attribute">xmlns</span>=<span class="hl-value">"http://www.springframework.org/schema/beans"</span>
+    <span class="hl-attribute">xmlns:xsi</span>=<span class="hl-value">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hl-attribute">xsi:schemaLocation</span>=<span class="hl-value">"http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"</span><span class="hl-tag">&gt;</span>
+
+    <span class="hl-tag">&lt;beans</span> <span class="hl-attribute">profile</span>=<span class="hl-value">"dev"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"textEncryptor"</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.security.crypto.encrypt.Encryptors"</span> 
+            <span class="hl-attribute">factory-method</span>=<span class="hl-value">"noOpText"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;/beans&gt;</span>
+	
+    <span class="hl-tag">&lt;beans</span> <span class="hl-attribute">profile</span>=<span class="hl-value">"prod"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"textEncryptor"</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.security.crypto.encrypt.Encryptors"</span> 
+                <span class="hl-attribute">factory-method</span>=<span class="hl-value">"text"</span><span class="hl-tag">&gt;</span>
+            <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${security.encryptPassword}"</span><span class="hl-tag"> /&gt;</span>
+            <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${security.encryptSalt}"</span><span class="hl-tag"> /&gt;</span>
+        <span class="hl-tag">&lt;/bean&gt;</span>
+    <span class="hl-tag">&lt;/beans&gt;</span>
+
+<span class="hl-tag">&lt;/beans&gt;</span>
+			</pre>	
+			<p>
+				Just like the Java-based configuration, profiles are used to select which of the text encryptors will be created. 
+			</p>		
+		</div>
+
+	</div>
+	  
+	<div class="section" title="4.3&nbsp;Creating connections with ConnectController"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connect-controller"></a>4.3&nbsp;Creating connections with <code class="classname">ConnectController</code></h2></div></div></div>
+		
+		<p>
+			With its dependencies configured, <code class="classname">ConnectController</code> now has what it needs to allow users to establish connections with registered service providers.
+			Now, simply add it to your Social @Configuration:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> ConnectController connectController() {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> ConnectController(connectionFactoryLocator(), 
+            connectionRepository());
+    }
+    
+}
+		</pre>		
+		<p>
+			Or, if you prefer Spring's XML-based configuration, then you can configure <code class="classname">ConnectController</code> like this:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ConnectController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			<code class="classname">ConnectController</code> supports authorization flows for OAuth 1 and OAuth 2, relying on <code class="interfacename">OAuth1Operations</code> or <code class="interfacename">OAuth2Operations</code> to handle the specifics for each protocol.
+			<code class="classname">ConnectController</code> will obtain the appropriate OAuth operations interface from one of the provider connection factories registered with <code class="classname">ConnectionFactoryRegistry</code>.
+			It will select a specific <code class="classname">ConnectionFactory</code> to use by matching the connection factory's ID with the URL path.
+			The path pattern that <code class="classname">ConnectController</code> handles is "/connect/{providerId}".
+			Therefore, if <code class="classname">ConnectController</code> is handling a request for "/connect/twitter", then the <code class="interfacename">ConnectionFactory</code> whose <code class="methodname">getProviderId()</code> returns "twitter" will be used.
+			(As configured in the previous section, <code class="classname">TwitterConnectionFactory</code> will be chosen.)
+		</p>
+		<p>
+			When coordinating a connection with a service provider, <code class="classname">ConnectController</code> constructs a callback URL for the provider to redirect to after the user grants authorization.
+			By default <code class="classname">ConnectController</code> uses information from the request to determine the protocol, host name, and port number to use when creating the callback URL.
+			This is fine in many cases, but if your application is hosted behind a proxy those details may point to an internal server and will not be suitable for constructing a public callback URL.
+		</p>
+		<p>
+			If you have this problem, you can set the <code class="code">applicationUrl</code> property to the base external URL of your application.
+			<code class="classname">ConnectController</code> will use that URL to construct the callback URL instead of using information from the request.
+			For example:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> ConnectController connectController() {
+        ConnectController controller = <span class="hl-keyword">new</span> ConnectController(
+            connectionFactoryLocator(), connectionRepository());
+        controller.setApplicationUrl(environment.getProperty(<span class="hl-string">"application.url"</span>);
+        <span class="hl-keyword">return</span> controller;
+    }
+    
+}
+		</pre>
+		
+		<p>
+			Or if you prefer XML configuration:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ConnectController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"applicationUrl"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${application.url}"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			Just as with the authorization keys and secrets, we recommend that you externalize the application URL because it will likely vary across different deployment environments.
+		</p>
+		<p>
+			The flow that <code class="classname">ConnectController</code> follows is slightly different, depending on which authorization protocol is supported by the service provider.
+			For OAuth 2-based providers, the flow is as follows:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">GET /connect</code> - Displays a web page showing connection status for all providers.</p></li><li class="listitem"><p><code class="code">GET /connect/{providerId}</code> - Displays a web page showing connection status to the provider.</p></li><li class="listitem"><p><code class="code">POST /connect/{providerId}</code> - Initiates the connection flow with the provider.</p></li><li class="listitem"><p><code class="code">GET /connect/{providerId}?code={code}</code> - Receives the authorization callback from the provider, accepting an authorization code. Uses the code to request an access token and complete the connection.</p></li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}</code> - Severs all of the user's connection with the provider.</p></li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}/{providerUserId}</code> - Severs a specific connection with the provider, based on the user's provider user ID.</p></li></ul></div>    
+		<p>
+			For an OAuth 1 provider, the flow is very similar, with only a subtle difference in how the callback is handled:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">GET /connect</code> - Displays a web page showing connection status for all providers.</p></li><li class="listitem"><p><code class="code">GET /connect/{providerId}</code> - Displays a web page showing connection status to the provider.</p></li><li class="listitem"><p><code class="code">POST /connect/{providerId}</code> - Initiates the connection flow with the provider.</p></li><li class="listitem">
+				<p>
+					<code class="code">GET /connect/{providerId}?oauth_token={request token}&amp;oauth_verifier={verifier}</code> - 
+					Receives the authorization callback from the provider, accepting a verification code. 
+					Exchanges this verification code along with the request token for an access token and completes the connection.
+					The <code class="code">oauth_verifier</code> parameter is optional and is only used for providers implementing OAuth 1.0a.
+				</p>
+			</li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}</code> - Severs all of the user's connection with the provider.</p></li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}/{providerUserId}</code> - Severs a specific connection with the provider, based on the user's provider user ID.</p></li></ul></div>
+
+		<div class="section" title="4.3.1&nbsp;Displaying a connection page"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-1"></a>4.3.1&nbsp;Displaying a connection page</h3></div></div></div>
+			
+			<p>
+				Before the connection flow starts in earnest, a web application may choose to show a page that offers the user information on their connection status.
+				This page would offer them the opportunity to create a connection between their account and their social profile. 
+				<code class="classname">ConnectController</code> can display such a page if the browser navigates to <code class="code">/connect/{provider}</code>.
+			</p>
+			<p>
+				For example, to display a connection status page for Twitter, where the provider name is "twitter", your application should provide a link similar to this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;a</span> <span class="hl-attribute">href</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;"&gt;Connect to Twitter<span class="hl-tag">&lt;/a&gt;</span>
+			</pre>
+			<p>
+				<code class="classname">ConnectController</code> will respond to this request by first checking to see if a connection already exists between the user's account and Twitter. 
+				If not, then it will with a view that should offer the user an opportunity to create the connection. 
+				Otherwise, it will respond with a view to inform the user that a connection already exists.
+			</p>
+			<p>
+				The view names that <code class="classname">ConnectController</code> responds with are based on the provider's name. 
+				In this case, since the provider name is "twitter", the view names are "connect/twitterConnect" and "connect/twitterConnected".
+			</p>
+			<p>
+				Optionally, you may choose to display a page that shows connection status for all providers.
+				In that case, the link might look like this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;a</span> <span class="hl-attribute">href</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect" /&gt;"&gt;Your connections<span class="hl-tag">&lt;/a&gt;</span>
+			</pre>
+			<p>
+				The view name that <code class="classname">ConnectController</code> responds with for this URL is "connect/status".
+			</p>
+		</div>
+    
+		<div class="section" title="4.3.2&nbsp;Initiating the connection flow"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-2"></a>4.3.2&nbsp;Initiating the connection flow</h3></div></div></div>
+			
+			<p>
+				To kick off the connection flow, the application should <code class="code">POST</code> to <code class="code">/connect/{providerId}</code>. 
+				Continuing with the Twitter example, a JSP view resolved from "connect/twitterConnect" might include the following form:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;" method="POST"&gt;
+    <span class="hl-tag">&lt;p&gt;</span>You haven't created any connections with Twitter yet. Click the button to create
+       a connection between your account and your Twitter profile. 
+       (You'll be redirected to Twitter where you'll be asked to authorize the connection.)<span class="hl-tag">&lt;/p&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span><span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span><span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/r</span>esources/social/twitter/signin.png" /&gt;"/&gt;
+    <span class="hl-tag">&lt;/button&gt;</span><span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+			</pre>
+      		<p>
+      			When <code class="classname">ConnectController</code> handles the request, it will redirect the browser to the provider's authorization page. 
+      			In the case of an OAuth 1 provider, it will first fetch a request token from the provider and pass it along as a parameter to the authorization page. 
+      			Request tokens aren't used in OAuth 2, however, so instead it passes the application's client ID and redirect URI as parameters to the authorization page.
+      		</p> 
+      		<p>
+      			For example, Twitter's authorization URL has the following pattern:
+      		</p>
+			<pre class="programlisting">https://twitter.com/oauth/authorize?oauth_token={token}</pre>
+      		<p>
+      			If the application's request token were "vPyVSe"<sup>[<a name="d4e687" href="#ftn.d4e687" class="footnote">1</a>]</sup>, then the browser would be redirected to https://twitter.com/oauth/authorize?oauth_token=vPyVSe and a page similar to the following would be displayed to the user (from Twitter)<sup>[<a name="d4e689" href="#ftn.d4e689" class="footnote">2</a>]</sup>:
+      		</p>
+			<div class="mediaobject" align="center"><img src="images/twitter-authorize.png" align="middle"></div>
+			<p>
+				In contrast, Facebook is an OAuth 2 provider, so its authorization URL takes a slightly different pattern:
+			</p>
+			<pre class="programlisting">https://graph.facebook.com/oauth/authorize?client_id={clientId}&amp;redirect_uri={redirectUri}</pre>
+			<p>
+				Thus, if the application's Facebook client ID is "0b754" and it's redirect URI is "http://www.mycoolapp.com/connect/facebook", then the browser would be redirected to https://graph.facebook.com/oauth/authorize?client_id=0b754&amp;redirect_uri=http://www.mycoolapp.com/connect/facebook and Facebook would display the following authorization page to the user:
+			</p>
+			<div class="mediaobject" align="center"><img src="images/facebook-authorize-basic.png" align="middle"></div>      
+			<p>
+				If the user clicks the "Allow" button to authorize access, the provider will redirect the browser back to the authorization callback URL where <code class="classname">ConnectController</code> will be waiting to complete the connection.
+			</p>
+      		<p>
+      			The behavior varies from provider to provider when the user denies the authorization. 
+      			For instance, Twitter will simply show a page telling the user that they denied the application access and does not redirect back to the application's callback URL. 
+      			Facebook, on the other hand, will redirect back to the callback URL with error information as request parameters.
+      		</p>
+      
+			<div class="section" title="Authorization scope"><div class="titlepage"><div><div><h4 class="title"><a name="connect-controller-flow-3-scope"></a>Authorization scope</h4></div></div></div>
+        		
+				<p>
+					In the previous example of authorizing an application to interact with a user's Facebook profile, you notice that the application is only requesting access to the user's basic profile information. 
+					But there's much more that an application can do on behalf of a user with Facebook than simply harvest their profile data. 
+					For example, how can an application gain authorization to post to a user's Facebook wall?
+				</p>
+				<p>
+					OAuth 2 authorization may optionally include a scope parameter that indicates the type of authorization being requested. 
+					On the provider, the "scope" parameter should be passed along to the authorization URL. 
+					In the case of Facebook, that means that the Facebook authorization URL pattern should be as follows:
+				</p>
+				<pre class="programlisting">https://graph.facebook.com/oauth/authorize?client_id={clientId}&amp;redirect_uri={redirectUri}&amp;scope={scope}</pre>
+				<p>
+					<code class="classname">ConnectController</code> accepts a "scope" parameter at authorization and passes its value along to the provider's authorization URL. 
+					For example, to request permission to post to a user's Facebook wall, the connect form might look like this:
+				</p>
+				<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;" method="POST"&gt;
+    <span class="hl-tag">&lt;input</span> <span class="hl-attribute">type</span>=<span class="hl-value">"hidden"</span> <span class="hl-attribute">name</span>=<span class="hl-value">"scope"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"publish_stream,offline_access"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span>You haven't created any connections with Twitter yet. Click the button to create
+       a connection between your account and your Twitter profile. 
+       (You'll be redirected to Twitter where you'll be asked to authorize the connection.)<span class="hl-tag">&lt;/p&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span><span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span><span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/r</span>esources/social/twitter/signin.png" /&gt;"/&gt;
+    <span class="hl-tag">&lt;/button&gt;</span><span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+				</pre>
+				<p>
+					The hidden "scope" field contains the scope values to be passed along in the <code class="code">scope&gt;</code> parameter to Facebook's authorization URL. 
+					In this case, "publish_stream" requests permission to post to a user's wall. 
+					In addition, "offline_access" requests permission to access Facebook on behalf of a user even when the user isn't using the application.
+				</p>
+				<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top">
+					<p>
+						OAuth 2 access tokens typically expire after some period of time. 
+						Per the OAuth 2 specification, an application may continue accessing a provider after a token expires by using a refresh token to either renew an expired access token or receive a new access token (all without troubling the user to re-authorize the application).
+					</p>
+					<p>
+						Facebook does not currently support refresh tokens. 
+						Moreover, Facebook access tokens expire after about 2 hours. 
+						So, to avoid having to ask your users to re-authorize ever 2 hours, the best way to keep a long-lived access token is to request "offline_access".
+					</p>
+				</td></tr></table></div>
+				<p>
+					When asking for "publish_stream,offline_access" authorization, the user will be prompted with the following authorization page from Facebook:
+				</p>
+				<div class="mediaobject" align="center"><img src="images/facebook-authorize-scoped.png" align="middle"></div>
+				<p>
+					Scope values are provider-specific, so check with the service provider's documentation for the available scopes. 
+					Facebook scopes are documented at <a class="ulink" href="http://developers.facebook.com/docs/authentication/permissions" target="_top">http://developers.facebook.com/docs/authentication/permissions</a>.
+				</p>
+			</div>
+		</div>
+    
+		<div class="section" title="4.3.3&nbsp;Responding to the authorization callback"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-3"></a>4.3.3&nbsp;Responding to the authorization callback</h3></div></div></div>
+			
+			<p>
+				After the user agrees to allow the application have access to their profile on the provider, the provider will redirect their browser back to the application's authorization URL with a code that can be exchanged for an access token. 
+				For OAuth 1.0a providers, the callback URL is expected to receive the code (known as a verifier in OAuth 1 terms) in an <code class="code">oauth_verifier</code> parameter. 
+				For OAuth 2, the code will be in a <code class="code">code</code> parameter.
+			</p>
+			<p>
+				<code class="classname">ConnectController</code> will handle the callback request and trade in the verifier/code for an access token. 
+				Once the access token has been received, the OAuth dance is complete and the application may use the access token to interact with the provider on behalf of the user. 
+				The last thing that <code class="classname">ConnectController</code> does is to hand off the access token to the <code class="interfacename">ServiceProvider</code> implementation to be stored for future use.
+			</p>
+		</div>
+
+		<div class="section" title="4.3.4&nbsp;Disconnecting"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-disconnect"></a>4.3.4&nbsp;Disconnecting</h3></div></div></div>
+			
+			<p>
+				To delete a connection via <code class="classname">ConnectController</code>, submit a DELETE request to "/connect/{provider}".
+			</p>
+			<p>
+				In order to support this through a form in a web browser, you'll need to have Spring's <a class="ulink" href="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/filter/HiddenHttpMethodFilter.html" target="_top"><code class="classname">HiddenHttpMethodFilter</code></a> configured in your application's web.xml. 
+				Then you can provide a disconnect button via a form like this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;" method="post"&gt;
+  <span class="hl-tag">&lt;div</span> <span class="hl-attribute">class</span>=<span class="hl-value">"formInfo"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span>
+      Spring Social Showcase is connected to your Twitter account.
+      Click the button if you wish to disconnect.
+    <span class="hl-tag">&lt;/p&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span>Disconnect<span class="hl-tag">&lt;/button&gt;</span>	
+  <span class="hl-tag">&lt;input</span> <span class="hl-attribute">type</span>=<span class="hl-value">"hidden"</span> <span class="hl-attribute">name</span>=<span class="hl-value">"_method"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"delete"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+			</pre>
+			<p>
+				When this form is submitted, <code class="classname">ConnectController</code> will disconnect the user's account from the provider.
+				It does this by calling the <code class="methodname">disconnect()</code> method on each of the <code class="interfacename">Connection</code>s returned by the provider's <code class="methodname">getConnections()</code> method. 
+			</p>
+		</div>
+	</div>
+
+ 	<div class="section" title="4.4&nbsp;Connection interceptors"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connect-interceptors"></a>4.4&nbsp;Connection interceptors</h2></div></div></div>
+ 		
+		<p>
+			In the course of creating a connection with a service provider, you may want to inject additional functionality into the connection flow. 
+			For instance, perhaps you'd like to automatically post a tweet to a user's Twitter timeline immediately upon creating the connection.
+		</p>
+		<p>
+			<code class="classname">ConnectController</code> may be configured with one or more connection interceptors that it will call at points in the connection flow. 
+			These interceptors are defined by the <code class="interfacename">ConnectInterceptor</code> interface:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectInterceptor&lt;A&gt; {
+	
+    <span class="hl-keyword">void</span> preConnect(ConnectionFactory&lt;A&gt; connectionFactory, MultiValueMap&lt;String, String&gt; parameters, WebRequest request);
+
+    <span class="hl-keyword">void</span> postConnect(Connection&lt;A&gt; connection, WebRequest request);
+	
+}
+		</pre>
+		<p>
+			The <code class="methodname">preConnect()</code> method will be called by <code class="classname">ConnectController</code> just before redirecting the browser to the provider's authorization page.
+			Custom authorization parameters may be added to the provided parameter map.
+			<code class="methodname">postConnect()</code> will be called immediately after a connection has been persisted linking the user's local account with the provider profile.
+		</p>
+		<p>
+			For example, suppose that after connecting a user account with their Twitter profile you want to immediately post a tweet about that connection to the user's Twitter timeline. 
+			To accomplish that, you might write the following connection interceptor:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TweetAfterConnectInterceptor <span class="hl-keyword">implements</span> ConnectInterceptor&lt;Twitter&gt; {
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> preConnect(ConnectionFactory&lt;TwitterApi&gt; provider, MultiValueMap&lt;String, String&gt; parameters, WebRequest request) {
+        <span class="hl-comment">// nothing to do</span>
+    }
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> postConnect(Connection&lt;TwitterApi&gt; connection, WebRequest request) {
+        connection.updateStatus(<span class="hl-string">"I've connected with the Spring Social Showcase!"</span>);
+    }
+}
+		</pre>
+		<p>
+			This interceptor can then be injected into <code class="classname">ConnectController</code> when it is created:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ConnectController connectController() {
+    ConnectController controller = <span class="hl-keyword">new</span> ConnectController(connectionFactoryLocator(),
+        connectionRepository());
+    controller.addInterceptor(<span class="hl-keyword">new</span> TweetAfterConnectInterceptor());
+    <span class="hl-keyword">return</span> controller;
+}
+		</pre>
+		<p>Or, as configured in XML:</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ConnectController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"interceptors"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;list&gt;</span>
+            <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.showcase.twitter.TweetAfterConnectInterceptor"</span><span class="hl-tag"> /&gt;</span>
+        <span class="hl-tag">&lt;/list&gt;</span>
+    <span class="hl-tag">&lt;/property&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			Note that the <code class="code">interceptors</code> property is a list and can take as many interceptors as you'd like to wire into it. 
+			When it comes time for <code class="classname">ConnectController</code> to call into the interceptors, it will only invoke the interceptor methods for those interceptors whose service operations type matches the service provider's operations type. 
+			In the example given here, only connections made through a service provider whose operation type is <code class="interfacename">TwitterApi</code> will trigger the interceptor's methods.
+		</p>
+	</div>
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.d4e687" href="#d4e687" class="para">1</a>] </sup>This is just an example. Actual request tokens are typically much longer.</p></div><div class="footnote"><p><sup>[<a name="ftn.d4e689" href="#d4e689" class="para">2</a>] </sup>If the user has not yet signed into Twitter, the authorization page will also include a username and password field for authentication into Twitter.</p></div></div></div>
+    <div class="chapter" title="5.&nbsp;Signing in with Service Provider Accounts"><div class="titlepage"><div><div><h2 class="title"><a name="signin"></a>5.&nbsp;Signing in with Service Provider Accounts</h2></div></div></div>
+	
+
+	<div class="section" title="5.1&nbsp;Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="signin_introduction"></a>5.1&nbsp;Introduction</h2></div></div></div>
+		
+		<p>
+			In order to ease sign in for their users, many applications allow sign in with a service provider such as Twitter or Facebook.
+			With this authentication technique, the user signs into (or may already be signed into) his or her provider account.
+			The application then tries to match that provider account to a local user account.
+			If a match is found, the user is automatically signed into the application.
+		</p>
+		<p>
+			Spring Social supports such service provider-based authentication with <code class="classname">ProviderSignInController</code> from the <code class="code">spring-social-web</code> module.
+			<code class="classname">ProviderSignInController</code> works very much like <code class="classname">ConnectController</code> in that it goes through the OAuth flow (either OAuth 1 or OAuth 2, depending on the provider).
+			Instead of creating a connection at the end of process, however, <code class="classname">ProviderSignInController</code> attempts to find a previously established connection and uses the connected account to authenticate the user with the application.
+			If no previous connection matches, the flow will be sent to the application's sign up page so that the user may register with the application.
+		</p>
+	</div>
+
+	<div class="section" title="5.2&nbsp;Enabling provider sign in"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="signin_using"></a>5.2&nbsp;Enabling provider sign in</h2></div></div></div>
+		
+		<p>
+			To add provider sign in capability to your Spring application, configure <code class="classname">ProviderSignInController</code> as a bean in your Spring MVC application:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ProviderSignInController providerSignInController() {
+    <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> ProviderSignInController(connectionFactoryLocator(), 
+        usersConnectionRepository(), <span class="hl-keyword">new</span> SimpleSignInAdapter());
+}
+		</pre>
+		<p>
+			Or in XML, if you prefer:
+		</p>		
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ProviderSignInController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>    
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+		    As with <code class="classname">ConnectController</code>, <code class="classname">ProviderSignInController</code> uses information from the request to determine the protocol, host name, and port number to use when creating a callback URL.
+			But you may set the <code class="code">applicationUrl</code> property to the base external URL of your application to overcome any problems where the request refers to an internal server.
+			For example:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ProviderSignInController providerSignInController() {
+    ProviderSignInController controller = <span class="hl-keyword">new</span> ProviderSignInController(connectionFactoryLocator(), 
+        usersConnectionRepository(), <span class="hl-keyword">new</span> SimpleSignInAdapter());
+    controller.setApplicationUrl(environment.getProperty(<span class="hl-string">"application.url"</span>));
+    <span class="hl-keyword">return</span> controller;
+}
+		</pre>
+		<p>
+			Or when configured in XML:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ProviderSignInController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>    
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"applicationUrl"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${application.url}"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			Once again, we recommend that you externalize the value of the application URL since it will vary between deployment environments.
+		</p>
+		<p>
+			When authenticating via an OAuth 2 provider, <code class="classname">ProviderSignInController</code> supports the following flow:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">POST /signin/{providerId}</code> - Initiates the sign in flow by redirecting to the provider's authentication endpoint.</p></li><li class="listitem"><p><code class="code">GET /signin/{providerId}?code={verifier}</code> - Receives the authentication callback from the provider, accepting a code. Exchanges this code for an access token. Using this access token, it retrieves the user's provider user ID and uses that to lookup a connected account and then authenticates to the application through the sign in service. </p>
+				<div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+						<p>
+							If the provider user ID doesn't match any existing connection, <code class="classname">ProviderSignInController</code> will redirect to a sign up URL. 
+							The default sign up URL is "/signup" (relative to the application root), but can be customized by setting the <code class="code">signUpUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If the provider user ID matches more than one existing connection, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL to offer the user a chance to sign in through another provider or with their username and password.
+							The request to the sign in URL will have an "error" query parameter set to "multiple_users" to indicate the problem so that the page can communicate it to the user.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If any error occurs while fetching the access token or while fetching the user's profile data, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL.
+							The request to the sign in URL will have an "error" query parameter set to "provider" to indicate an error occurred while communicating with the provider.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li></ul></div>
+			</li></ul></div>
+		<p>
+			For OAuth 1 providers, the flow is only slightly different:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">POST /signin/{providerId}</code> - Initiates the sign in flow. This involves fetching a request token from the provider and then redirecting to Provider's authentication endpoint.</p>
+				<div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+						<p>
+							If any error occurs while fetching the request token, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL.
+							The request to the sign in URL will have an "error" query parameter set to "provider" to indicate an error occurred while communicating with the provider.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li></ul></div>
+			</li><li class="listitem"><p><code class="code">GET /signin/{providerId}?oauth_token={request token}&amp;oauth_verifier={verifier}</code> - Receives the authentication callback from the provider, accepting a verification code. Exchanges this verification code along with the request token for an access token. Using this access token, it retrieves the user's provider user ID and uses that to lookup a connected account and then authenticates to the application through the sign in service. </p>
+				<div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+						<p>
+							If the provider user ID doesn't match any existing connection, <code class="classname">ProviderSignInController</code> will redirect to a sign up URL. 
+							The default sign up URL is "/signup" (relative to the application root), but can be customized by setting the <code class="code">signUpUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If the provider user ID matches more than one existing connection, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL to offer the user a chance to sign in through another provider or with their username and password.
+							The request to the sign in URL will have an "error" query parameter set to "multiple_users" to indicate the problem so that the page can communicate it to the user.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li><li class="listitem">
+						<p>
+							If any error occurs when exchanging the request token for an access token or while fetching the user's profile data, <code class="classname">ProviderSignInController</code> will redirect to the application's sign in URL.
+							The request to the sign in URL will have an "error" query parameter set to "provider" to indicate an error occurred while communicating with the provider.
+							The default sign in URL is "/signin" (relative to the application root), but can be customized by setting the <code class="code">signInUrl</code> property.
+						</p>
+					</li></ul></div>
+			</li></ul></div>
+		<div class="section" title="5.2.1&nbsp;ProviderSignInController's dependencies"><div class="titlepage"><div><div><h3 class="title"><a name="d4e846"></a>5.2.1&nbsp;ProviderSignInController's dependencies</h3></div></div></div>
+			
+			<p>
+				As shown in the Java-based configuration above, <code class="classname">ProviderSignInController</code> depends on a handful of other objects to do its job.
+			</p>
+			<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>A <code class="interfacename">ConnectionFactoryLocator</code> to lookup the ConnectionFactory used to create the Connection to the provider.</p></li><li class="listitem"><p>A <code class="interfacename">UsersConnectionRepository</code> to find the user that has the connection to the provider user attempting to sign in.</p></li><li class="listitem"><p>A <code class="interfacename">SignInAdapter</code> to sign a user into the application when a matching connection is found.</p></li></ul></div>
+			<p>
+				When using XML configuration, it isn't necessary to explicitly configure these constructor arguments because <code class="classname">ProviderSignInController</code>'s constructor is annotated with <code class="code">@Inject</code>.
+				Those dependencies will be given to <code class="classname">ProviderSignInController</code> via autowiring.
+				You'll still need to make sure they're available as beans in the Spring application context so that they can be autowired.
+			</p>
+			<p>
+				You should have already configured most of these dependencies when setting up connection support (in the previous chapter).
+				But when used with <code class="classname">ProviderSignInController</code>, you should configure them to be created as scoped proxies:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<i><span class="hl-annotation" style="color: gray">@Scope(value="singleton", proxyMode=ScopedProxyMode.INTERFACES)</span></i>
+<span class="hl-keyword">public</span> ConnectionFactoryLocator connectionFactoryLocator() {
+    ConnectionFactoryRegistry registry = <span class="hl-keyword">new</span> ConnectionFactoryRegistry();
+    
+    registry.addConnectionFactory(<span class="hl-keyword">new</span> FacebookConnectionFactory(
+        environment.getProperty(<span class="hl-string">"facebook.clientId"</span>),
+        environment.getProperty(<span class="hl-string">"facebook.clientSecret"</span>)));
+            
+    registry.addConnectionFactory(<span class="hl-keyword">new</span> TwitterConnectionFactory(
+        environment.getProperty(<span class="hl-string">"twitter.consumerKey"</span>),
+        environment.getProperty(<span class="hl-string">"twitter.consumerSecret"</span>)));
+            
+    <span class="hl-keyword">return</span> registry;
+}
+
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<i><span class="hl-annotation" style="color: gray">@Scope(value="singleton", proxyMode=ScopedProxyMode.INTERFACES)</span></i>
+<span class="hl-keyword">public</span> UsersConnectionRepository usersConnectionRepository() {
+    <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(dataSource, connectionFactoryLocator(), textEncryptor);
+}
+			</pre>	
+			<p>
+				In the event that the sign in attempt fails, the sign in attempt will be stored in the session to be used to present a sign-up page to the user (see <a class="xref" href="#signin_signup" title="5.3&nbsp;Signing up after a failed sign in">Section&nbsp;5.3, &#8220;Signing up after a failed sign in&#8221;</a>).
+				By configuring ConnectionFactoryLocator and UsersConnectionRepository as scoped proxies, it enables the proxies to be carried along with the sign in attempt in the session rather than the actual objects themselves.
+			</p>
+			<p>	
+				The <code class="interfacename">SignInAdapter</code> is exclusively used for provider sign in and so a <code class="interfacename">SignInAdapter</code> bean will need to be added to the configuration.
+				But first, you'll need to write an implementation of the <code class="interfacename">SignInAdapter</code> interface.
+			</p>
+			<p>
+				The <code class="interfacename">SignInAdapter</code> interface is defined as follows:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> SignInAdapter {
+    String signIn(String userId, Connection&lt;?&gt; connection, NativeWebRequest request);
+}
+			</pre>
+			<p>
+				The <code class="methodname">signIn()</code> method takes the local application user's user ID normalized as a <code class="classname">String</code>.
+				No other credentials are necessary here because by the time this method is called the user will have signed into the provider and their connection with that provider has been used to prove the user's identity.
+				Implementations of this interface should use this user ID to authenticate the user to the application. 
+			</p>
+			<p>
+				Different applications will implement security differently, so each application must implement <code class="interfacename">SignInAdapter</code> in a way that fits its unique security scheme.
+				For example, suppose that an application's security is based on Spring Security and simply uses a user's account ID as their principal. 
+				In that case, a simple implementation of <code class="interfacename">SignInAdapter</code> might look like this:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Service</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SpringSecuritySignInAdapter <span class="hl-keyword">implements</span> SignInAdapter {
+    <span class="hl-keyword">public</span> String signIn(String localUserId, Connection&lt;?&gt; connection, NativeWebRequest request) {
+        SecurityContextHolder.getContext().setAuthentication(
+            <span class="hl-keyword">new</span> UsernamePasswordAuthenticationToken(localUserId, null, null));
+        <span class="hl-keyword">return</span> null;
+    }
+}
+			</pre>
+		</div>
+		
+		<div class="section" title="5.2.2&nbsp;Adding a provider sign in button"><div class="titlepage"><div><div><h3 class="title"><a name="d4e883"></a>5.2.2&nbsp;Adding a provider sign in button</h3></div></div></div>
+			
+			<p>
+				With <code class="classname">ProviderSignInController</code> and a <code class="interfacename">SignInAdapter</code> configured, the backend support for provider sign in is in place.
+	      		The last thing to do is to add a sign in button to your application that will kick off the authentication flow with <code class="classname">ProviderSignInController</code>.
+	   		</p>
+	   		<p>
+	      		For example, the following HTML snippet adds a "Signin with Twitter" button to a page:
+	  		</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">id</span>=<span class="hl-value">"tw_signin"</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/s</span>ignin/twitter"/&gt;" method="POST"&gt;
+  <span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/r</span>esources/social/twitter/sign-in-with-twitter-d.png"/&gt;" /&gt;
+  <span class="hl-tag">&lt;/button&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+			</pre>
+			<p>
+				Notice that the path used in the form's <code class="code">action</code> attribute maps to the first step in <code class="classname">ProviderSignInController</code>'s flow.
+				In this case, the provider is identified as "twitter".
+			</p>
+			<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top">
+				<p>
+					Some providers offer client-side sign in widgets, such as Twitter @Anywhere's "Connect with Twitter" button and Facebook's <code class="code">&lt;fb:login-button&gt;</code>.
+					Although these widgets offer a sign in experience similar to that of <code class="code">ProviderSignInController</code>, they cannot be used to drive <code class="code">ProviderSignInController</code>'s sign in flow.
+					The <code class="code">ProviderSignInController</code> sign in flow should be initiated by submitting a POST request as described above.
+				</p>
+			</td></tr></table></div>
+			<p>
+				Clicking this button will trigger a POST request to "/signin/twitter", kicking off the Twitter sign in flow. 
+				If the user has not yet signed into Twitter, the user will be presented with the following page from Twitter:
+			</p>
+			<div class="mediaobject" align="center"><img src="images/sign-in-with-twitter.png" align="middle"></div>
+			<p>
+				After signing in, the flow will redirect back to the application to complete the sign in process.
+			</p>
+    	</div>
+	</div>
+
+	<div class="section" title="5.3&nbsp;Signing up after a failed sign in"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="signin_signup"></a>5.3&nbsp;Signing up after a failed sign in</h2></div></div></div>
+		
+		<p>
+			If <code class="classname">ProviderSignInController</code> can't find a local user associated with a provider user attempting to sign in, there may be an opportunity to have the user sign up with the application.
+			Leveraging the information about the user received from the provider, the user may be presented with a pre-filled sign up form to explicitly sign up with the application.
+			It's also possible to use the user's provider data to implicitly create a new local application user without presenting a sign up form. 
+		</p>
+		<div class="section" title="5.3.1&nbsp;Signing up with a sign up form"><div class="titlepage"><div><div><h3 class="title"><a name="signin_signup_explicit"></a>5.3.1&nbsp;Signing up with a sign up form</h3></div></div></div>
+								
+			<p>
+				By default, the sign up URL is "/signup", relative to the application root. 
+				You can override that default by setting the <code class="code">signUpUrl</code> property on the controller. 
+				For example, the following configuration of <code class="classname">ProviderSignInController</code> sets the sign up URL to "/register": 
+			</p>
+			
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ProviderSignInController providerSignInController() {
+    ProviderSignInController controller = <span class="hl-keyword">new</span> ProviderSignInController(connectionFactoryLocator(), 
+        usersConnectionRepository(), <span class="hl-keyword">new</span> SimpleSignInAdapter());
+    controller.setSignUpUrl(<span class="hl-string">"/register"</span>);
+    <span class="hl-keyword">return</span> controller;
+}
+			</pre>
+			<p>
+				Or to set the sign up URL using XML configuration:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ProviderSignInController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"signUpUrl"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"/register"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+			</pre>
+			<p>
+				Before redirecting to the sign up page, <code class="classname">ProviderSignInController</code> collects some information about the authentication attempt.
+				This information can be used to prepopulate the sign up form and then, after successful sign up, to establish a connection between the new account and the provider account.			
+			</p>
+			<p>
+				To prepopulate the sign up form, you can fetch the user profile data from a connection retrieved from <code class="methodname">ProviderSignInUtils.getConnection()</code>.
+				For example, consider this Spring MVC controller method that setups up the sign up form with a <code class="classname">SignupForm</code> to bind to the sign up form:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@RequestMapping(value="/signup", method=RequestMethod.GET)</span></i>
+<span class="hl-keyword">public</span> SignupForm signupForm(WebRequest request) {
+    Connection&lt;?&gt; connection = ProviderSignInUtils.getConnection(request);
+    <span class="hl-keyword">if</span> (connection != null) {
+        <span class="hl-keyword">return</span> SignupForm.fromProviderUser(connection.fetchUserProfile());
+    } <span class="hl-keyword">else</span> {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> SignupForm();
+    }
+}
+			</pre>
+			<p>
+				If <code class="methodname">ProviderSignInUtils.getConnection()</code> returns a connection, that means there was a failed provider sign in attempt that can be completed if the user registers to the application.
+				In that case, a <code class="classname">SignupForm</code> object is created from the user profile data obtained from the connection's <code class="methodname">fetchUserProfile()</code> method.
+				Within <code class="methodname">fromProviderUser()</code>, the <code class="classname">SignupForm</code> properties may be set like this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">static</span> SignupForm fromProviderUser(UserProfile providerUser) {
+    SignupForm form = <span class="hl-keyword">new</span> SignupForm();
+    form.setFirstName(providerUser.getFirstName());
+    form.setLastName(providerUser.getLastName());
+    form.setUsername(providerUser.getUsername());
+    form.setEmail(providerUser.getEmail());
+    <span class="hl-keyword">return</span> form;
+}
+			</pre>
+			<p>
+				Here, the <code class="classname">SignupForm</code> is created with the user's first name, last name, username, and email from the <code class="classname">UserProfile</code>.
+				In addition, <code class="classname">UserProfile</code> also has a <code class="methodname">getName()</code> method which will return the user's full name as given by the provider.
+			</p>
+			<p>
+				The availability of <code class="classname">UserProfile</code>'s properties will depend on the provider.
+				Twitter, for example, does not provide a user's email address, so the <code class="methodname">getEmail()</code> method will always return null after a sign in attempt with Twitter.
+			</p>
+			<p>
+				After the user has successfully signed up in your application a connection can be created between the new local user account and their provider account. 
+				To complete the connection call <code class="methodname">ProviderSignInUtils.handlePostSignUp()</code>.
+				For example, the following method handles the sign up form submission, creates an account and then calls <code class="methodname">ProviderSignInUtils.handlePostSignUp()</code> to complete the connection:
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@RequestMapping(value="/signup", method=RequestMethod.POST)</span></i>
+<span class="hl-keyword">public</span> String signup(<i><span class="hl-annotation" style="color: gray">@Valid</span></i> SignupForm form, BindingResult formBinding, WebRequest request) {
+    <span class="hl-keyword">if</span> (formBinding.hasErrors()) {
+        <span class="hl-keyword">return</span> null;
+    }
+    Account account = createAccount(form, formBinding);
+    <span class="hl-keyword">if</span> (account != null) {
+        SignInUtils.signin(account.getUsername());
+        ProviderSignInUtils.handlePostSignUp(account.getUsername(), request);
+        <span class="hl-keyword">return</span> <span class="hl-string">"redirect:/"</span>;
+    }
+    <span class="hl-keyword">return</span> null;
+}
+			</pre>
+		</div>
+		<div class="section" title="5.3.2&nbsp;Implicit sign up"><div class="titlepage"><div><div><h3 class="title"><a name="signin_signup_implicit"></a>5.3.2&nbsp;Implicit sign up</h3></div></div></div>
+				
+			<p>
+				To enable implicit sign up, you must create an implementation of the <code class="interfacename">ConnectionSignUp</code> interface and inject an instance of that <code class="interfacename">ConnectionSignUp</code> to the connection repository.
+				The <code class="interfacename">ConnectionSignUp</code> interface is simple, with only a single method to implement:
+			</p>				
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectionSignUp {
+    String execute(Connection&lt;?&gt; connection);
+}
+			</pre>
+			<p>
+				The <code class="methodname">execute()</code> method is given a <code class="interfacename">Connection</code> that it can use to retrieve information about the user.
+				It can then use that information to create a new local application user and return the new local user ID.
+				For example, the following implementation fetches the user's provider profile and uses it to create a new account: 
+			</p>
+			<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> AccountConnectionSignUp <span class="hl-keyword">implements</span> ConnectionSignUp {
+
+    <span class="hl-keyword">private</span> <span class="hl-keyword">final</span> AccountRepository accountRepository;
+
+    <span class="hl-keyword">public</span> AccountConnectionSignUp(AccountRepository accountRepository) {
+        <span class="hl-keyword">this</span>.accountRepository = accountRepository;
+    }
+
+    <span class="hl-keyword">public</span> String execute(Connection&lt;?&gt; connection) {
+        UserProfile profile = connection.fetchUserProfile();
+        Account account = <span class="hl-keyword">new</span> Account(profile.getUsername(), profile.getFirstName(), profile.getLastName());
+        accountRepository.createAccount(account);
+        <span class="hl-keyword">return</span> account.getUsername();
+    }
+	
+}
+			</pre>
+			<p>
+				If there is any problem in creating the new user implicitly (for example, if the implicitly chosen username is already taken) <code class="methodname">execute()</code> may return null to indicate that the user could not be created implicitly.
+				This will ultimately result in <code class="classname">ProviderSignInController</code> redirecting the user to the signup page.
+			</p>
+			<p>
+				Once you've written a <code class="interfacename">ConnectionSignUp</code> for your application, you'll need to inject it into the <code class="interfacename">UsersConnectionRepository</code>.
+				In Java-based configuration: 
+			</p>
+			<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<i><span class="hl-annotation" style="color: gray">@Scope(value="singleton", proxyMode=ScopedProxyMode.INTERFACES)</span></i> 
+<span class="hl-keyword">public</span> UsersConnectionRepository usersConnectionRepository(AccountRepository accountRepository) {
+    JdbcUsersConnectionRepository repository = <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(
+        dataSource, connectionFactoryLocator(), Encryptors.noOpText());
+    repository.setConnectionSignUp(<span class="hl-keyword">new</span> AccountConnectionSignUp(accountRepository));
+    <span class="hl-keyword">return</span> repository;
+}
+			</pre>	
+		</div>
+	</div>	
+</div>
+    
+</div></body></html>

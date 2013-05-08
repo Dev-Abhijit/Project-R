@@ -1,0 +1,29 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                               	controllers.Application.login()
+POST    /                               	controllers.Application.authenticate()
+POST    /home                           	controllers.Application.signIn()
+GET     /home/:userName                 	controllers.Application.home(userName: String)
+POST    /home/:articleId                	controllers.Application.addRead(userName: String,articleId: Long)
+POST    /thread/:articleId              	controllers.Application.addToMyLib(userName: String,articleId: Long)
+GET     /thread/:articleId              	controllers.Application.threadContent(userName: String,articleId: Long)
+GET     /start                          	controllers.Start.index(userName: String)
+GET     /startproject                   	controllers.Start.startNewProject(userName: String)
+POST    /startproject                   	controllers.Start.submitProject(userName: String)
+POST    /start/:typeId                  	controllers.Start.submit(userName: String, typeId: String)
+GET     /lib                            	controllers.Application.libHome(username: String)
+POST    /lib                            	controllers.Application.createShelf(username: String)
+GET     /opinion/:username              	controllers.Application.opinionHome(username: String)
+POST    /opinion/                       	controllers.Application.submitOpinion(userName: String)
+GET     /opiniondisagree/:userName,:opId        controllers.Application.submitDisagree(userName: String, opId : Long)
+GET     /opinionagree/:userName,:opId    	controllers.Application.submitAgree(userName: String, opId : Long )
+GET     /opinionsingle/:opId              	controllers.Application.opinionSingle(opId: Long, userName: String)
+GET     /test                           	controllers.Application.test()
+GET     /test/:id                        	controllers.Application.user(id: Long)
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

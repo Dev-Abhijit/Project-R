@@ -1,0 +1,574 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>4.&nbsp;Connecting to Service Providers</title><link rel="stylesheet" href="css/manual-multipage.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"><link rel="home" href="index.html" title="Spring Social Reference Documentation"><link rel="up" href="index.html" title="Spring Social Reference Documentation"><link rel="prev" href="implementing.html" title="3.&nbsp;Adding Support for a New Service Provider"><link rel="next" href="signin.html" title="5.&nbsp;Signing in with Service Provider Accounts"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">4.&nbsp;Connecting to Service Providers</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="implementing.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="signin.html">Next</a></td></tr></table><hr></div><div class="chapter" title="4.&nbsp;Connecting to Service Providers"><div class="titlepage"><div><div><h2 class="title"><a name="connecting"></a>4.&nbsp;Connecting to Service Providers</h2></div></div></div>
+	
+	<div class="section" title="4.1&nbsp;Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="section_connecting_introduction"></a>4.1&nbsp;Introduction</h2></div></div></div>
+		
+      	<p>
+      		In <a class="xref" href="serviceprovider.html" title="2.&nbsp;Service Provider 'Connect' Framework">Chapter&nbsp;2, <i>Service Provider 'Connect' Framework</i></a>, you learned how Spring Social's <span class="emphasis"><em>Service Provider 'Connect' Framework</em></span> can be used to manage user connections that link your application's user accounts with accounts on external service providers.
+      		In this chapter, you'll learn how to control the connect flow in a web application environment.
+      	</p>
+		<p>
+			Spring Social's <code class="code">spring-social-web</code> module includes <code class="classname">ConnectController</code>, a Spring MVC controller that coordinates the connection flow between an application and service providers.
+			<code class="classname">ConnectController</code> takes care of redirecting the user to the service provider for authorization and responding to the callback after authorization.
+		</p>
+	</div>
+	<div class="section" title="4.2&nbsp;Configuring ConnectController"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="section_connecting_service_providers"></a>4.2&nbsp;Configuring ConnectController</h2></div></div></div>
+				
+		<p>
+			As <code class="classname">ConnectController</code> directs the overall connection flow, it depends on several other objects to do its job.
+			Before getting into those, first we'll define a single Java @Configuration class where the various Spring Social objects, including ConnectController, will be configured:
+			</p><pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+}
+			</pre><p>			
+		</p>
+		<p>
+			Now, <code class="classname">ConnectController</code> first delegates to one or more ConnectionFactory instances to establish connections to providers on behalf of users.
+			Once a connection has been established, it delegates to a <code class="interfacename">ConnectionRepository</code> to persist user connection data.
+		</p>
+		<p>
+			Each of the Spring Social provider modules includes a <code class="interfacename">ConnectionFactory</code> implementation:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="classname">org.springframework.social.twitter.connect.TwitterConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.facebook.connect.FacebookConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.linkedin.connect.LinkedInConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.tripit.connect.TripItConnectionFactory</code></p></li><li class="listitem"><p><code class="classname">org.springframework.social.github.connect.GitHubConnectionFactory</code></p></li></ul></div>
+		<p>
+			To register one or more ConnectionFactories, simply define a ConnectionFactoryLocator @Bean as follows:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> ConnectionFactoryLocator connectionFactoryLocator() {
+        ConnectionFactoryRegistry registry = <span class="hl-keyword">new</span> ConnectionFactoryRegistry();
+        
+        registry.addConnectionFactory(<span class="hl-keyword">new</span> FacebookConnectionFactory(
+            environment.getProperty(<span class="hl-string">"facebook.clientId"</span>),
+            environment.getProperty(<span class="hl-string">"facebook.clientSecret"</span>)));
+        
+        registry.addConnectionFactory(<span class="hl-keyword">new</span> TwitterConnectionFactory(
+            environment.getProperty(<span class="hl-string">"twitter.consumerKey"</span>),
+            environment.getProperty(<span class="hl-string">"twitter.consumerSecret"</span>)));
+            
+        <span class="hl-keyword">return</span> registry;
+    }
+
+    <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+    <span class="hl-keyword">private</span> Environment environment;
+	
+}</pre>
+		<p>
+			Above, two connection factories, one for Facebook and one for Twitter, have been registered.
+			If you would like to support other providers, simply register their connection factories here.
+			Because client ids and secrets may be different across environments (e.g., test, production, etc), we recommend you externalize these values.
+		</p>	
+		<p>
+			As discussed in <a class="xref" href="serviceprovider.html#service-providers-persisting-connections" title="2.3&nbsp;Persisting connections">Section&nbsp;2.3, &#8220;Persisting connections&#8221;</a>, <code class="interfacename">ConnectionRepository</code> defines operations for persisting and restoring connections for a specific user. 
+			Therefore, when configuring a <code class="interfacename">ConnectionRepository</code> bean for use by ConnectController, it must be scoped such that it can be created on a per-user basis.
+			The following Java-based configuration shows how to construct an proxy to a request-scoped <code class="interfacename">ConnectionRepository</code> instance for the currently authenticated user:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <i><span class="hl-annotation" style="color: gray">@Scope(value="request", proxyMode=ScopedProxyMode.INTERFACES)</span></i>
+    <span class="hl-keyword">public</span> ConnectionRepository connectionRepository(
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        <span class="hl-keyword">if</span> (authentication == null) {
+            <span class="hl-keyword">throw</span> <span class="hl-keyword">new</span> IllegalStateException(<span class="hl-string">"Unable to get a ConnectionRepository: no user signed in"</span>);
+        }
+        <span class="hl-keyword">return</span> usersConnectionRepository().createConnectionRepository(authentication.getName());
+    }
+	
+}
+		</pre>	
+		<p>
+			The @Bean method above is injected with a <code class="classname">Principal</code> representing the current user's identity.
+			This is passed to UsersConnectionRepository to construct a ConnectionRepository instance for that user.
+		</p>	
+		<p>
+			This means that we're also going to need to configure a <code class="interfacename">UsersConnectionRepository</code> @Bean:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> UsersConnectionRepository usersConnectionRepository() {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> JdbcUsersConnectionRepository(dataSource, connectionFactoryLocator(), 
+            textEncryptor);
+    }
+
+    <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+    <span class="hl-keyword">private</span> DataSource dataSource;
+
+    <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+    <span class="hl-keyword">private</span> TextEncryptor textEncryptor;	
+}
+		</pre>
+		<p>
+			UsersConnectionRepository is a singleton data store for connections across all users.
+			<code class="classname">JdbcUsersConnectionRepository</code> is the RDMS-based implementation and needs a <code class="interfacename">DataSource</code>, <code class="interfacename">ConnectionFactoryLocator</code>, and <code class="interfacename">TextEncryptor</code> to do its job.
+			It will use the <code class="interfacename">DataSource</code> to access the RDBMS when persisting and restoring connections.
+			When restoring connections, it will use the <code class="interfacename">ConnectionFactoryLocator</code> to locate ConnectionFactory instances.
+		</p>
+		<p>
+			<code class="classname">JdbcUsersConnectionRepository</code> uses the <code class="interfacename">TextEncryptor</code> to encrypt credentials when persisting connections.
+			Spring Security 3.1 makes a few useful text encryptors available via static factory methods in its <code class="classname">Encryptors</code> class.
+			For example, a no-op text encryptor is useful at development time and can be configured like this:
+		</p>		
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SecurityConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+    <i><span class="hl-annotation" style="color: gray">@Profile("dev")</span></i>
+    <span class="hl-keyword">static</span> <span class="hl-keyword">class</span> Dev {
+
+        <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+        <span class="hl-keyword">public</span> TextEncryptor textEncryptor() {
+            <span class="hl-keyword">return</span> Encryptors.noOpText();
+        }
+
+    }
+
+}
+		</pre>
+		<p>
+			Notice that the inner configuration class is annotated with <code class="code">@Profile("dev")</code>. 
+			Spring 3.1 introduced the profile concept where certain beans will only be created when certain profiles are active. 
+			Here, the <code class="code">@Profile</code> annotation ensures that this <code class="interfacename">TextEncryptor</code> will only be created when "dev" is an active profile. 
+			For production-time purposes, a stronger text encryptor is recommended and can be created when the "production" profile is active:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SecurityConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+    <i><span class="hl-annotation" style="color: gray">@Profile("prod")</span></i>
+    <span class="hl-keyword">static</span> <span class="hl-keyword">class</span> Prod {
+
+        <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+        <span class="hl-keyword">public</span> TextEncryptor textEncryptor() {
+            <span class="hl-keyword">return</span> Encryptors.queryableText(environment.getProperty(<span class="hl-string">"security.encryptPassword"</span>),
+                environment.getProperty(<span class="hl-string">"security.encryptSalt"</span>));
+        }
+
+        <i><span class="hl-annotation" style="color: gray">@Inject</span></i>
+        <span class="hl-keyword">private</span> Environment environment;
+
+    }
+
+}
+		</pre>
+		<div class="section" title="4.2.1&nbsp;Configuring connection support in XML"><div class="titlepage"><div><div><h3 class="title"><a name="d4e573"></a>4.2.1&nbsp;Configuring connection support in XML</h3></div></div></div>
+			
+			<p>
+				Up to this point, the connection support configuration has been done using Spring's Java-based configuration style. 
+				But you can configure it in either Java configuration or XML. 
+				Here's the XML equivalent of the <code class="classname">ConnectionFactoryRegistry</code> configuration: 			
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"connectionFactoryLocator"</span> 
+      <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.support.ConnectionFactoryRegistry"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"connectionFactories"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;list&gt;</span>
+            <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.twitter.connect.TwitterConnectionFactory"</span><span class="hl-tag">&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${twitter.consumerKey}"</span><span class="hl-tag"> /&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${twitter.consumerSecret}"</span><span class="hl-tag"> /&gt;</span>				
+            <span class="hl-tag">&lt;/bean&gt;</span>
+            <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.facebook.connect.FacebookConnectionFactory"</span><span class="hl-tag">&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${facebook.clientId}"</span><span class="hl-tag"> /&gt;</span>
+                <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${facebook.clientSecret}"</span><span class="hl-tag"> /&gt;</span>				
+            <span class="hl-tag">&lt;/bean&gt;</span>
+        <span class="hl-tag">&lt;/list&gt;</span>
+    <span class="hl-tag">&lt;/property&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+			</pre>	
+			<p>
+				This is functionally equivalent to the Java-based configuration of <code class="classname">ConnectionFactoryRegistry</code> shown before.
+			</p>
+			<p>
+				Here's an XML equivalent of the <code class="classname">JdbcUsersConnectionRepository</code> and <code class="classname">ConnectionRepository</code> configurations shown before:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"usersConnectionRepository"</span> 
+      <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.jdbc.JdbcUsersConnectionRepository"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">ref</span>=<span class="hl-value">"dataSource"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">ref</span>=<span class="hl-value">"connectionFactoryLocator"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">ref</span>=<span class="hl-value">"textEncryptor"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"connectionRepository"</span> <span class="hl-attribute">factory-method</span>=<span class="hl-value">"createConnectionRepository"</span> 
+      <span class="hl-attribute">factory-bean</span>=<span class="hl-value">"usersConnectionRepository"</span> <span class="hl-attribute">scope</span>=<span class="hl-value">"request"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"#{request.userPrincipal.name}"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;aop:scoped-proxy</span> <span class="hl-attribute">proxy-target-class</span>=<span class="hl-value">"false"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+			</pre>
+			<p>
+				Likewise, here is the equivalent configuration of the <code class="interfacename">TextEncryptor</code> beans:
+			</p>
+			<pre class="programlisting">
+<span class="hl-directive" style="color: maroon">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hl-tag">&lt;beans</span> <span class="hl-attribute">xmlns</span>=<span class="hl-value">"http://www.springframework.org/schema/beans"</span>
+    <span class="hl-attribute">xmlns:xsi</span>=<span class="hl-value">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hl-attribute">xsi:schemaLocation</span>=<span class="hl-value">"http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"</span><span class="hl-tag">&gt;</span>
+
+    <span class="hl-tag">&lt;beans</span> <span class="hl-attribute">profile</span>=<span class="hl-value">"dev"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"textEncryptor"</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.security.crypto.encrypt.Encryptors"</span> 
+            <span class="hl-attribute">factory-method</span>=<span class="hl-value">"noOpText"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;/beans&gt;</span>
+	
+    <span class="hl-tag">&lt;beans</span> <span class="hl-attribute">profile</span>=<span class="hl-value">"prod"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">id</span>=<span class="hl-value">"textEncryptor"</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.security.crypto.encrypt.Encryptors"</span> 
+                <span class="hl-attribute">factory-method</span>=<span class="hl-value">"text"</span><span class="hl-tag">&gt;</span>
+            <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${security.encryptPassword}"</span><span class="hl-tag"> /&gt;</span>
+            <span class="hl-tag">&lt;constructor-arg</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${security.encryptSalt}"</span><span class="hl-tag"> /&gt;</span>
+        <span class="hl-tag">&lt;/bean&gt;</span>
+    <span class="hl-tag">&lt;/beans&gt;</span>
+
+<span class="hl-tag">&lt;/beans&gt;</span>
+			</pre>	
+			<p>
+				Just like the Java-based configuration, profiles are used to select which of the text encryptors will be created. 
+			</p>		
+		</div>
+
+	</div>
+	  
+	<div class="section" title="4.3&nbsp;Creating connections with ConnectController"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connect-controller"></a>4.3&nbsp;Creating connections with <code class="classname">ConnectController</code></h2></div></div></div>
+		
+		<p>
+			With its dependencies configured, <code class="classname">ConnectController</code> now has what it needs to allow users to establish connections with registered service providers.
+			Now, simply add it to your Social @Configuration:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> ConnectController connectController() {
+        <span class="hl-keyword">return</span> <span class="hl-keyword">new</span> ConnectController(connectionFactoryLocator(), 
+            connectionRepository());
+    }
+    
+}
+		</pre>		
+		<p>
+			Or, if you prefer Spring's XML-based configuration, then you can configure <code class="classname">ConnectController</code> like this:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ConnectController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			<code class="classname">ConnectController</code> supports authorization flows for OAuth 1 and OAuth 2, relying on <code class="interfacename">OAuth1Operations</code> or <code class="interfacename">OAuth2Operations</code> to handle the specifics for each protocol.
+			<code class="classname">ConnectController</code> will obtain the appropriate OAuth operations interface from one of the provider connection factories registered with <code class="classname">ConnectionFactoryRegistry</code>.
+			It will select a specific <code class="classname">ConnectionFactory</code> to use by matching the connection factory's ID with the URL path.
+			The path pattern that <code class="classname">ConnectController</code> handles is "/connect/{providerId}".
+			Therefore, if <code class="classname">ConnectController</code> is handling a request for "/connect/twitter", then the <code class="interfacename">ConnectionFactory</code> whose <code class="methodname">getProviderId()</code> returns "twitter" will be used.
+			(As configured in the previous section, <code class="classname">TwitterConnectionFactory</code> will be chosen.)
+		</p>
+		<p>
+			When coordinating a connection with a service provider, <code class="classname">ConnectController</code> constructs a callback URL for the provider to redirect to after the user grants authorization.
+			By default <code class="classname">ConnectController</code> uses information from the request to determine the protocol, host name, and port number to use when creating the callback URL.
+			This is fine in many cases, but if your application is hosted behind a proxy those details may point to an internal server and will not be suitable for constructing a public callback URL.
+		</p>
+		<p>
+			If you have this problem, you can set the <code class="code">applicationUrl</code> property to the base external URL of your application.
+			<code class="classname">ConnectController</code> will use that URL to construct the callback URL instead of using information from the request.
+			For example:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Configuration</span></i>
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> SocialConfig {
+
+    <i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+    <span class="hl-keyword">public</span> ConnectController connectController() {
+        ConnectController controller = <span class="hl-keyword">new</span> ConnectController(
+            connectionFactoryLocator(), connectionRepository());
+        controller.setApplicationUrl(environment.getProperty(<span class="hl-string">"application.url"</span>);
+        <span class="hl-keyword">return</span> controller;
+    }
+    
+}
+		</pre>
+		
+		<p>
+			Or if you prefer XML configuration:
+		</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ConnectController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-comment">&lt;!-- relies on by-type autowiring for the constructor-args --&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"applicationUrl"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"${application.url}"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			Just as with the authorization keys and secrets, we recommend that you externalize the application URL because it will likely vary across different deployment environments.
+		</p>
+		<p>
+			The flow that <code class="classname">ConnectController</code> follows is slightly different, depending on which authorization protocol is supported by the service provider.
+			For OAuth 2-based providers, the flow is as follows:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">GET /connect</code> - Displays a web page showing connection status for all providers.</p></li><li class="listitem"><p><code class="code">GET /connect/{providerId}</code> - Displays a web page showing connection status to the provider.</p></li><li class="listitem"><p><code class="code">POST /connect/{providerId}</code> - Initiates the connection flow with the provider.</p></li><li class="listitem"><p><code class="code">GET /connect/{providerId}?code={code}</code> - Receives the authorization callback from the provider, accepting an authorization code. Uses the code to request an access token and complete the connection.</p></li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}</code> - Severs all of the user's connection with the provider.</p></li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}/{providerUserId}</code> - Severs a specific connection with the provider, based on the user's provider user ID.</p></li></ul></div>    
+		<p>
+			For an OAuth 1 provider, the flow is very similar, with only a subtle difference in how the callback is handled:
+		</p>
+		<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">GET /connect</code> - Displays a web page showing connection status for all providers.</p></li><li class="listitem"><p><code class="code">GET /connect/{providerId}</code> - Displays a web page showing connection status to the provider.</p></li><li class="listitem"><p><code class="code">POST /connect/{providerId}</code> - Initiates the connection flow with the provider.</p></li><li class="listitem">
+				<p>
+					<code class="code">GET /connect/{providerId}?oauth_token={request token}&amp;oauth_verifier={verifier}</code> - 
+					Receives the authorization callback from the provider, accepting a verification code. 
+					Exchanges this verification code along with the request token for an access token and completes the connection.
+					The <code class="code">oauth_verifier</code> parameter is optional and is only used for providers implementing OAuth 1.0a.
+				</p>
+			</li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}</code> - Severs all of the user's connection with the provider.</p></li><li class="listitem"><p><code class="code">DELETE /connect/{providerId}/{providerUserId}</code> - Severs a specific connection with the provider, based on the user's provider user ID.</p></li></ul></div>
+
+		<div class="section" title="4.3.1&nbsp;Displaying a connection page"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-1"></a>4.3.1&nbsp;Displaying a connection page</h3></div></div></div>
+			
+			<p>
+				Before the connection flow starts in earnest, a web application may choose to show a page that offers the user information on their connection status.
+				This page would offer them the opportunity to create a connection between their account and their social profile. 
+				<code class="classname">ConnectController</code> can display such a page if the browser navigates to <code class="code">/connect/{provider}</code>.
+			</p>
+			<p>
+				For example, to display a connection status page for Twitter, where the provider name is "twitter", your application should provide a link similar to this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;a</span> <span class="hl-attribute">href</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;"&gt;Connect to Twitter<span class="hl-tag">&lt;/a&gt;</span>
+			</pre>
+			<p>
+				<code class="classname">ConnectController</code> will respond to this request by first checking to see if a connection already exists between the user's account and Twitter. 
+				If not, then it will with a view that should offer the user an opportunity to create the connection. 
+				Otherwise, it will respond with a view to inform the user that a connection already exists.
+			</p>
+			<p>
+				The view names that <code class="classname">ConnectController</code> responds with are based on the provider's name. 
+				In this case, since the provider name is "twitter", the view names are "connect/twitterConnect" and "connect/twitterConnected".
+			</p>
+			<p>
+				Optionally, you may choose to display a page that shows connection status for all providers.
+				In that case, the link might look like this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;a</span> <span class="hl-attribute">href</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect" /&gt;"&gt;Your connections<span class="hl-tag">&lt;/a&gt;</span>
+			</pre>
+			<p>
+				The view name that <code class="classname">ConnectController</code> responds with for this URL is "connect/status".
+			</p>
+		</div>
+    
+		<div class="section" title="4.3.2&nbsp;Initiating the connection flow"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-2"></a>4.3.2&nbsp;Initiating the connection flow</h3></div></div></div>
+			
+			<p>
+				To kick off the connection flow, the application should <code class="code">POST</code> to <code class="code">/connect/{providerId}</code>. 
+				Continuing with the Twitter example, a JSP view resolved from "connect/twitterConnect" might include the following form:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;" method="POST"&gt;
+    <span class="hl-tag">&lt;p&gt;</span>You haven't created any connections with Twitter yet. Click the button to create
+       a connection between your account and your Twitter profile. 
+       (You'll be redirected to Twitter where you'll be asked to authorize the connection.)<span class="hl-tag">&lt;/p&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span><span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span><span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/r</span>esources/social/twitter/signin.png" /&gt;"/&gt;
+    <span class="hl-tag">&lt;/button&gt;</span><span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+			</pre>
+      		<p>
+      			When <code class="classname">ConnectController</code> handles the request, it will redirect the browser to the provider's authorization page. 
+      			In the case of an OAuth 1 provider, it will first fetch a request token from the provider and pass it along as a parameter to the authorization page. 
+      			Request tokens aren't used in OAuth 2, however, so instead it passes the application's client ID and redirect URI as parameters to the authorization page.
+      		</p> 
+      		<p>
+      			For example, Twitter's authorization URL has the following pattern:
+      		</p>
+			<pre class="programlisting">https://twitter.com/oauth/authorize?oauth_token={token}</pre>
+      		<p>
+      			If the application's request token were "vPyVSe"<sup>[<a name="d4e687" href="#ftn.d4e687" class="footnote">1</a>]</sup>, then the browser would be redirected to https://twitter.com/oauth/authorize?oauth_token=vPyVSe and a page similar to the following would be displayed to the user (from Twitter)<sup>[<a name="d4e689" href="#ftn.d4e689" class="footnote">2</a>]</sup>:
+      		</p>
+			<div class="mediaobject" align="center"><img src="images/twitter-authorize.png" align="middle"></div>
+			<p>
+				In contrast, Facebook is an OAuth 2 provider, so its authorization URL takes a slightly different pattern:
+			</p>
+			<pre class="programlisting">https://graph.facebook.com/oauth/authorize?client_id={clientId}&amp;redirect_uri={redirectUri}</pre>
+			<p>
+				Thus, if the application's Facebook client ID is "0b754" and it's redirect URI is "http://www.mycoolapp.com/connect/facebook", then the browser would be redirected to https://graph.facebook.com/oauth/authorize?client_id=0b754&amp;redirect_uri=http://www.mycoolapp.com/connect/facebook and Facebook would display the following authorization page to the user:
+			</p>
+			<div class="mediaobject" align="center"><img src="images/facebook-authorize-basic.png" align="middle"></div>      
+			<p>
+				If the user clicks the "Allow" button to authorize access, the provider will redirect the browser back to the authorization callback URL where <code class="classname">ConnectController</code> will be waiting to complete the connection.
+			</p>
+      		<p>
+      			The behavior varies from provider to provider when the user denies the authorization. 
+      			For instance, Twitter will simply show a page telling the user that they denied the application access and does not redirect back to the application's callback URL. 
+      			Facebook, on the other hand, will redirect back to the callback URL with error information as request parameters.
+      		</p>
+      
+			<div class="section" title="Authorization scope"><div class="titlepage"><div><div><h4 class="title"><a name="connect-controller-flow-3-scope"></a>Authorization scope</h4></div></div></div>
+        		
+				<p>
+					In the previous example of authorizing an application to interact with a user's Facebook profile, you notice that the application is only requesting access to the user's basic profile information. 
+					But there's much more that an application can do on behalf of a user with Facebook than simply harvest their profile data. 
+					For example, how can an application gain authorization to post to a user's Facebook wall?
+				</p>
+				<p>
+					OAuth 2 authorization may optionally include a scope parameter that indicates the type of authorization being requested. 
+					On the provider, the "scope" parameter should be passed along to the authorization URL. 
+					In the case of Facebook, that means that the Facebook authorization URL pattern should be as follows:
+				</p>
+				<pre class="programlisting">https://graph.facebook.com/oauth/authorize?client_id={clientId}&amp;redirect_uri={redirectUri}&amp;scope={scope}</pre>
+				<p>
+					<code class="classname">ConnectController</code> accepts a "scope" parameter at authorization and passes its value along to the provider's authorization URL. 
+					For example, to request permission to post to a user's Facebook wall, the connect form might look like this:
+				</p>
+				<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;" method="POST"&gt;
+    <span class="hl-tag">&lt;input</span> <span class="hl-attribute">type</span>=<span class="hl-value">"hidden"</span> <span class="hl-attribute">name</span>=<span class="hl-value">"scope"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"publish_stream,offline_access"</span><span class="hl-tag"> /&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span>You haven't created any connections with Twitter yet. Click the button to create
+       a connection between your account and your Twitter profile. 
+       (You'll be redirected to Twitter where you'll be asked to authorize the connection.)<span class="hl-tag">&lt;/p&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span><span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span><span class="hl-tag">&lt;img</span> <span class="hl-attribute">src</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/r</span>esources/social/twitter/signin.png" /&gt;"/&gt;
+    <span class="hl-tag">&lt;/button&gt;</span><span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+				</pre>
+				<p>
+					The hidden "scope" field contains the scope values to be passed along in the <code class="code">scope&gt;</code> parameter to Facebook's authorization URL. 
+					In this case, "publish_stream" requests permission to post to a user's wall. 
+					In addition, "offline_access" requests permission to access Facebook on behalf of a user even when the user isn't using the application.
+				</p>
+				<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top">
+					<p>
+						OAuth 2 access tokens typically expire after some period of time. 
+						Per the OAuth 2 specification, an application may continue accessing a provider after a token expires by using a refresh token to either renew an expired access token or receive a new access token (all without troubling the user to re-authorize the application).
+					</p>
+					<p>
+						Facebook does not currently support refresh tokens. 
+						Moreover, Facebook access tokens expire after about 2 hours. 
+						So, to avoid having to ask your users to re-authorize ever 2 hours, the best way to keep a long-lived access token is to request "offline_access".
+					</p>
+				</td></tr></table></div>
+				<p>
+					When asking for "publish_stream,offline_access" authorization, the user will be prompted with the following authorization page from Facebook:
+				</p>
+				<div class="mediaobject" align="center"><img src="images/facebook-authorize-scoped.png" align="middle"></div>
+				<p>
+					Scope values are provider-specific, so check with the service provider's documentation for the available scopes. 
+					Facebook scopes are documented at <a class="ulink" href="http://developers.facebook.com/docs/authentication/permissions" target="_top">http://developers.facebook.com/docs/authentication/permissions</a>.
+				</p>
+			</div>
+		</div>
+    
+		<div class="section" title="4.3.3&nbsp;Responding to the authorization callback"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-3"></a>4.3.3&nbsp;Responding to the authorization callback</h3></div></div></div>
+			
+			<p>
+				After the user agrees to allow the application have access to their profile on the provider, the provider will redirect their browser back to the application's authorization URL with a code that can be exchanged for an access token. 
+				For OAuth 1.0a providers, the callback URL is expected to receive the code (known as a verifier in OAuth 1 terms) in an <code class="code">oauth_verifier</code> parameter. 
+				For OAuth 2, the code will be in a <code class="code">code</code> parameter.
+			</p>
+			<p>
+				<code class="classname">ConnectController</code> will handle the callback request and trade in the verifier/code for an access token. 
+				Once the access token has been received, the OAuth dance is complete and the application may use the access token to interact with the provider on behalf of the user. 
+				The last thing that <code class="classname">ConnectController</code> does is to hand off the access token to the <code class="interfacename">ServiceProvider</code> implementation to be stored for future use.
+			</p>
+		</div>
+
+		<div class="section" title="4.3.4&nbsp;Disconnecting"><div class="titlepage"><div><div><h3 class="title"><a name="connect-controller-flow-disconnect"></a>4.3.4&nbsp;Disconnecting</h3></div></div></div>
+			
+			<p>
+				To delete a connection via <code class="classname">ConnectController</code>, submit a DELETE request to "/connect/{provider}".
+			</p>
+			<p>
+				In order to support this through a form in a web browser, you'll need to have Spring's <a class="ulink" href="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/filter/HiddenHttpMethodFilter.html" target="_top"><code class="classname">HiddenHttpMethodFilter</code></a> configured in your application's web.xml. 
+				Then you can provide a disconnect button via a form like this:
+			</p>
+			<pre class="programlisting">
+<span class="hl-tag">&lt;form</span> <span class="hl-attribute">action</span>=<span class="hl-value">"&lt;c:url value="</span><span class="hl-tag">/c</span>onnect/twitter" /&gt;" method="post"&gt;
+  <span class="hl-tag">&lt;div</span> <span class="hl-attribute">class</span>=<span class="hl-value">"formInfo"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span>
+      Spring Social Showcase is connected to your Twitter account.
+      Click the button if you wish to disconnect.
+    <span class="hl-tag">&lt;/p&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attribute">type</span>=<span class="hl-value">"submit"</span><span class="hl-tag">&gt;</span>Disconnect<span class="hl-tag">&lt;/button&gt;</span>	
+  <span class="hl-tag">&lt;input</span> <span class="hl-attribute">type</span>=<span class="hl-value">"hidden"</span> <span class="hl-attribute">name</span>=<span class="hl-value">"_method"</span> <span class="hl-attribute">value</span>=<span class="hl-value">"delete"</span><span class="hl-tag"> /&gt;</span>
+<span class="hl-tag">&lt;/form&gt;</span>
+			</pre>
+			<p>
+				When this form is submitted, <code class="classname">ConnectController</code> will disconnect the user's account from the provider.
+				It does this by calling the <code class="methodname">disconnect()</code> method on each of the <code class="interfacename">Connection</code>s returned by the provider's <code class="methodname">getConnections()</code> method. 
+			</p>
+		</div>
+	</div>
+
+ 	<div class="section" title="4.4&nbsp;Connection interceptors"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connect-interceptors"></a>4.4&nbsp;Connection interceptors</h2></div></div></div>
+ 		
+		<p>
+			In the course of creating a connection with a service provider, you may want to inject additional functionality into the connection flow. 
+			For instance, perhaps you'd like to automatically post a tweet to a user's Twitter timeline immediately upon creating the connection.
+		</p>
+		<p>
+			<code class="classname">ConnectController</code> may be configured with one or more connection interceptors that it will call at points in the connection flow. 
+			These interceptors are defined by the <code class="interfacename">ConnectInterceptor</code> interface:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">interface</span> ConnectInterceptor&lt;A&gt; {
+	
+    <span class="hl-keyword">void</span> preConnect(ConnectionFactory&lt;A&gt; connectionFactory, MultiValueMap&lt;String, String&gt; parameters, WebRequest request);
+
+    <span class="hl-keyword">void</span> postConnect(Connection&lt;A&gt; connection, WebRequest request);
+	
+}
+		</pre>
+		<p>
+			The <code class="methodname">preConnect()</code> method will be called by <code class="classname">ConnectController</code> just before redirecting the browser to the provider's authorization page.
+			Custom authorization parameters may be added to the provided parameter map.
+			<code class="methodname">postConnect()</code> will be called immediately after a connection has been persisted linking the user's local account with the provider profile.
+		</p>
+		<p>
+			For example, suppose that after connecting a user account with their Twitter profile you want to immediately post a tweet about that connection to the user's Twitter timeline. 
+			To accomplish that, you might write the following connection interceptor:
+		</p>
+		<pre class="programlisting">
+<span class="hl-keyword">public</span> <span class="hl-keyword">class</span> TweetAfterConnectInterceptor <span class="hl-keyword">implements</span> ConnectInterceptor&lt;Twitter&gt; {
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> preConnect(ConnectionFactory&lt;TwitterApi&gt; provider, MultiValueMap&lt;String, String&gt; parameters, WebRequest request) {
+        <span class="hl-comment">// nothing to do</span>
+    }
+
+    <span class="hl-keyword">public</span> <span class="hl-keyword">void</span> postConnect(Connection&lt;TwitterApi&gt; connection, WebRequest request) {
+        connection.updateStatus(<span class="hl-string">"I've connected with the Spring Social Showcase!"</span>);
+    }
+}
+		</pre>
+		<p>
+			This interceptor can then be injected into <code class="classname">ConnectController</code> when it is created:
+		</p>
+		<pre class="programlisting">
+<i><span class="hl-annotation" style="color: gray">@Bean</span></i>
+<span class="hl-keyword">public</span> ConnectController connectController() {
+    ConnectController controller = <span class="hl-keyword">new</span> ConnectController(connectionFactoryLocator(),
+        connectionRepository());
+    controller.addInterceptor(<span class="hl-keyword">new</span> TweetAfterConnectInterceptor());
+    <span class="hl-keyword">return</span> controller;
+}
+		</pre>
+		<p>Or, as configured in XML:</p>
+		<pre class="programlisting">
+<span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.connect.web.ConnectController"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;property</span> <span class="hl-attribute">name</span>=<span class="hl-value">"interceptors"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;list&gt;</span>
+            <span class="hl-tag">&lt;bean</span> <span class="hl-attribute">class</span>=<span class="hl-value">"org.springframework.social.showcase.twitter.TweetAfterConnectInterceptor"</span><span class="hl-tag"> /&gt;</span>
+        <span class="hl-tag">&lt;/list&gt;</span>
+    <span class="hl-tag">&lt;/property&gt;</span>
+<span class="hl-tag">&lt;/bean&gt;</span>
+		</pre>
+		<p>
+			Note that the <code class="code">interceptors</code> property is a list and can take as many interceptors as you'd like to wire into it. 
+			When it comes time for <code class="classname">ConnectController</code> to call into the interceptors, it will only invoke the interceptor methods for those interceptors whose service operations type matches the service provider's operations type. 
+			In the example given here, only connections made through a service provider whose operation type is <code class="interfacename">TwitterApi</code> will trigger the interceptor's methods.
+		</p>
+	</div>
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.d4e687" href="#d4e687" class="para">1</a>] </sup>This is just an example. Actual request tokens are typically much longer.</p></div><div class="footnote"><p><sup>[<a name="ftn.d4e689" href="#d4e689" class="para">2</a>] </sup>If the user has not yet signed into Twitter, the authorization page will also include a username and password field for authentication into Twitter.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="implementing.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;<a accesskey="n" href="signin.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.&nbsp;Adding Support for a New Service Provider&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;5.&nbsp;Signing in with Service Provider Accounts</td></tr></table></div></body></html>

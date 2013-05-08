@@ -1,0 +1,166 @@
+@(userName : String, myOpinionForm: Form[OpinionDetails], visb: List[String], opinion_details: List[OpinionDetails], opinionobj: List[OpinionObj], opDetails : List[OpinionObj])
+
+@import helper._
+
+
+@main("Home Page"){
+<div class="home-link">
+<a href="@routes.Application.opinionHome(userName)">My Home</a>
+</div>
+<div class="myprofile">
+<h3 id="myprofile-h3">My Profile</h3>
+<ul class="myprofile-ul">
+@userName
+</ul>
+</div>
+<div class="myread">
+<h3 id="myread-h3">My Opinions</h3>
+ <ul class="myread-ul">
+@for(opdetail <- opDetails){
+@if(opdetail.opiniondetails.subject.length() > 85) {
+<li class="read">
+<div class="op-sub">
+@opdetail.opiniondetails.subject.substring(0,85)..
+</div>
+<div class="op-value">
+@if(opdetail.vote == "agree"){
+Agreed
+} else {
+Disagreed
+}
+</div>
+<div class="op-res">
+@opdetail.countAgree vs @opdetail.countDisagree
+</div>
+</li>
+} else {
+<li class="read">
+<div class="op-sub">
+@opdetail.opiniondetails.subject
+</div>
+<div class="op-value">
+@if(opdetail.vote == "agree"){
+Agreed
+} else {
+Disagreed
+}
+</div>
+<div class="op-res">
+@opdetail.countAgree vs @opdetail.countDisagree
+</div>
+</li>
+}
+
+}
+</ul>
+</div>
+}{
+	<div class="content-home">
+	<ul>
+        @for(opinion <- opinionobj){
+            <li class="op-list">
+            <span class="op-cont">
+            <div class="drop-shadow lifted">
+
+                <h4 class="op-sub">@opinion.opiniondetails.subject</h4>
+                @if(opinion.opiniondetails.media != null){
+                <img src=@routes.Assets.at(opinion.opiniondetails.media) width="100%">
+                }
+                <h4 class="op-meta-data">rippl'd by @opinion.opiniondetails.user.getName()</h4>
+                <h4 class="op-meta-data">@opinion.opiniondetails.category</h4>
+            </div>
+            </span>
+            @if(opinion.vote != "n"){
+            <span class="op-vote">
+            @if(opinion.vote == "agree"){
+            <div class="op-details">You have Agreed!
+            <br/><br/>
+            <a class="button-op" href="@routes.Application.opinionSingle(opinion.id, userName)">View Details</a>
+            </div>
+            } else {
+            <div class="op-details">You have Disagreed!
+            <br/><br/>
+            <a class="button-op" href="@routes.Application.opinionSingle(opinion.id, userName)">View Details</a>
+
+            </div>
+            }
+            </span>
+
+            } else {
+            <span class="op-vote">
+
+            <div id="agree-button">
+            <a href="@routes.Application.submitAgree(userName,opinion.id)" onclick="return false;" class="button-op">Agree?</a>
+            </div>
+            <div id="disagree-button">
+            <a href="@routes.Application.submitDisagree(userName,opinion.id)" onclick="return false;" class="button-op">Disagree?</a>
+            </div>
+            <div class="op-res">
+            <br/><br/>
+
+            </div>
+            <div class="op-res-det">
+			     <a class="button-op" href="@routes.Application.opinionSingle(opinion.id, userName)">View Details</a>
+			</div>
+            </span>
+            </li>
+            }
+        }
+    </ul>
+
+
+    </div><!-- content-home -->
+
+}{
+	<div id="opinion-modal">
+	<input type='button' value='Ripplect My Expression' name='button-side' class='button-side'/>
+
+	</div>
+	<!-- modal content -->
+	<div id="opinion-modal-content">
+		<h3>Get an Opinion</h3>
+		@helper.form(action = routes.Application.submitOpinion(userName), 'enctype -> "multipart/form-data") {
+
+            @inputText(
+                myOpinionForm("subject"),
+                '_label -> "",
+                '_error -> myOpinionForm.globalError,
+                'size -> 50,
+                'class -> "input-stnd"
+            )
+
+            @inputFile(
+                myOpinionForm("inputfile"),
+                '_label -> "",
+                '_error -> myOpinionForm.globalError
+            )
+
+           @select(
+                myOpinionForm("interest"),
+                options = options(Interests.list),
+                '_default -> "Choose the Interest Category",
+                '_label -> "",
+                '_help -> ""
+            )
+           @select(
+                myOpinionForm("visibility"),
+                options = options(visb),
+                '_default -> "Choose the Visibility",
+                '_label -> "",
+                '_help -> ""
+            )
+            @checkbox(
+                myOpinionForm("Geography"),
+                '_label -> None,
+                '_text -> "Restrict to Geography",
+                '_showConstraints -> false
+            )
+		<input type="submit" value="Publish My Expression" class="button-stnd" id="opinion-submit">
+		}
+
+	</div>
+	<!-- preload the images -->
+	<div style='display:none'>
+		<img src=@routes.Assets.at("images/x.png") alt="">
+	</div>
+}
